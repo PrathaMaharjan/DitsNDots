@@ -118,7 +118,7 @@
   right: 0;
   bottom: -3px;
   height: 1px;
-  background: #9a78f5;
+  background: #f2997c;
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -135,7 +135,7 @@
   transform-origin: right center;
 }
 .ab-flink:focus-visible {
-  outline: 2px solid #9a78f5;
+  outline: 2px solid #f2997c;
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -244,7 +244,7 @@
    lifts slightly. The open row keeps a plain chevron since clicking it
    again is intentionally a no-op. */
 .ab-faq-btn:hover span:nth-child(2) {
-  color: #501ebd;
+  color: #e84610;
 }
 .ab-faq-btn span:nth-child(2) {
   transition: color 0.25s ease;
@@ -253,7 +253,7 @@
   background: #3c14a0;
 }
 .ab-faq-btn:focus-visible {
-  outline: 2px solid #501ebd;
+  outline: 2px solid #e84610;
   outline-offset: 4px;
   border-radius: 4px;
 }
@@ -564,7 +564,7 @@
   position: absolute;
   inset: auto 0 0 0;
   height: 2px;
-  background: #9a78f5;
+  background: #f2997c;
   transform: scaleX(0);
   transform-origin: left center;
   pointer-events: none;
@@ -608,7 +608,7 @@
   transform: scaleX(1);
 }
 .ab-tile:focus-visible {
-  outline: 2px solid #9a78f5;
+  outline: 2px solid #f2997c;
   outline-offset: 3px;
 }
 
@@ -698,14 +698,14 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #9a78f5;
+  background: #f2997c;
   transform: scaleY(0);
   transform-origin: top center;
   transition: transform 0.55s var(--cap-ease);
 }
 .ab-cap-row.is-open {
   padding-left: 22px;
-  background: linear-gradient(90deg, rgba(154, 120, 245, 0.07), rgba(154, 120, 245, 0) 42%);
+  background: linear-gradient(90deg, rgba(242, 153, 124, 0.07), rgba(242, 153, 124, 0) 42%);
 }
 .ab-cap-row.is-open::before {
   transform: scaleY(1);
@@ -715,7 +715,7 @@
   transition: color 0.4s ease, transform 0.5s var(--cap-ease);
 }
 .ab-cap-row.is-open .ab-cap-row__t {
-  color: #9a78f5;
+  color: #f2997c;
 }
 .ab-cap-row__l {
   transition: color 0.4s ease, opacity 0.4s ease;
@@ -724,7 +724,7 @@
   color: rgba(247, 246, 243, 0.78);
 }
 .ab-cap-row:focus-visible {
-  outline: 2px solid #9a78f5;
+  outline: 2px solid #f2997c;
   outline-offset: -2px;
 }
 
@@ -747,7 +747,7 @@
   display: block;
   height: 1px;
   margin: 0 8px;
-  background: #9a78f5;
+  background: #f2997c;
   transform-origin: left center;
   animation: abCapDwell var(--dwell, 5200ms) linear forwards;
 }
@@ -867,7 +867,7 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background: var(--btn-fill, #9a78f5);
+  background: var(--btn-fill, #f2997c);
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.55s var(--btn-ease);
@@ -887,7 +887,7 @@
   transition-duration: 0.08s;
 }
 .ab-btn:focus-visible {
-  outline: 2px solid #9a78f5;
+  outline: 2px solid #f2997c;
   outline-offset: 3px;
 }
 
@@ -898,25 +898,25 @@
    label white on the cream fill and so unreadable while hovered. */
 .ab-btn--solid {
   --btn-fill: #f7f6f3;
-  background: #501ebd;
+  background: #e84610;
   color: #ffffff;
 }
 .ab-btn--solid:hover,
 .ab-btn--solid:focus-visible {
   color: #0e0e0e;
-  box-shadow: 0 14px 30px rgba(80, 30, 189, 0.28);
+  box-shadow: 0 14px 30px rgba(232, 70, 16, 0.28);
 }
 
 /* Outlined pill on dark ground: fills with brand and the hairline
    border resolves into the fill it now sits on. */
 .ab-btn--ghost {
-  --btn-fill: #501ebd;
+  --btn-fill: #e84610;
 }
 .ab-btn--ghost:hover,
 .ab-btn--ghost:focus-visible {
   color: #ffffff;
-  border-color: #9a78f5;
-  box-shadow: 0 14px 30px rgba(80, 30, 189, 0.22);
+  border-color: #f2997c;
+  box-shadow: 0 14px 30px rgba(232, 70, 16, 0.22);
 }
 
 /* Light pill on the carousel's dark backdrop. Fills with brand and the
@@ -925,14 +925,14 @@
    theme on the element. Applied as real inline background/color they would
    outrank the :hover below and the label would never invert. */
 .ab-btn--invert {
-  --btn-fill: #501ebd;
+  --btn-fill: #e84610;
   background: var(--btn-rest-bg, #f7f6f3);
   color: var(--btn-rest-ink, #0e0e0e);
 }
 .ab-btn--invert:hover,
 .ab-btn--invert:focus-visible {
   color: #ffffff;
-  box-shadow: 0 14px 28px rgba(80, 30, 189, 0.34);
+  box-shadow: 0 14px 28px rgba(232, 70, 16, 0.34);
 }
 
 /* Ink pill on a cream/stone ground — the studio band. The other three
@@ -940,12 +940,12 @@
    brand so the wipe still reads against #EAE9E4. Label stays white through
    the transition, so only the ground moves. */
 .ab-btn--ink {
-  --btn-fill: #501ebd;
+  --btn-fill: #e84610;
 }
 .ab-btn--ink:hover,
 .ab-btn--ink:focus-visible {
   color: #ffffff;
-  box-shadow: 0 14px 30px rgba(80, 30, 189, 0.26);
+  box-shadow: 0 14px 30px rgba(232, 70, 16, 0.26);
 }
 
 /* Reduced motion: keep the colour change, drop the wipe and the lift.
@@ -984,7 +984,7 @@
    screen at small sizes.
    --------------------------------------------------------------- */
 .ab-seam {
-  --seam-dot: #501ebd;
+  --seam-dot: #e84610;
   --seam-ground: #f7f6f3;
   position: relative;
   height: clamp(110px, 15vh, 190px);
@@ -1016,7 +1016,7 @@
 /* Dark side: the same field inverted, for a seam that runs into an ink
    ground instead of the cream one. */
 .ab-seam--ink {
-  --seam-dot: #9a78f5;
+  --seam-dot: #f2997c;
   --seam-ground: #0e0e0e;
 }
 

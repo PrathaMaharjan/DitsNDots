@@ -95,7 +95,7 @@ function Tile({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: `radial-gradient(circle at 32% 24%, rgba(154,120,245,.16), rgba(25,25,25,0) 62%), ${TILE}`,
+            background: `radial-gradient(circle at 32% 24%, rgba(242, 153, 124,.16), rgba(25,25,25,0) 62%), ${TILE}`,
           }}
         >
           <span

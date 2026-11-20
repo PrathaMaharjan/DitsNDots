@@ -1,7 +1,7 @@
 export const BG = "#F7F6F3";
 export const INK = "#0E0E0E";
-export const BRAND = "#501EBD";
-export const BRAND_LIGHT = "#9A78F5";
+export const BRAND = "#E84610";
+export const BRAND_LIGHT = "#F2997C";
 export const CARD = "#EAE9E4";
 export const CARD_DARK = "#DEDDD7";
 export const INK_DEEP = "#100A1E";

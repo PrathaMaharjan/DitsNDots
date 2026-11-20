@@ -78,7 +78,7 @@ export default function TestimonialsV2({ data }: TestimonialsV2Props) {
                   transition: "transform .6s ease-in-out,opacity .6s ease-in-out",
                 }}
               >
-                <span style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 46, lineHeight: 0.6, color: dark ? "#9A78F5" : "#501EBD" }}>
+                <span style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 46, lineHeight: 0.6, color: dark ? "#F2997C" : "#E84610" }}>
                   &ldquo;
                 </span>
                 <p style={{ margin: 0, fontSize: "clamp(16px,1.35vw,21px)", lineHeight: 1.55, color: dark ? undefined : "#2A2A28" }}>{t.quote}</p>

@@ -21,7 +21,7 @@ export default function FooterV2() {
       <div className="ab-grid-footer" style={{ maxWidth: 1680, margin: "0 auto", width: "100%", display: "grid", gridTemplateColumns: "minmax(0,1.5fr) repeat(3,minmax(0,.8fr))", gap: "clamp(24px,3vw,48px)", paddingBottom: "clamp(36px,6vh,72px)" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <span style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 22, letterSpacing: "-.03em" }}>
-            ABSTRAKT<span style={{ color: "#9A78F5" }}>.</span>
+            ABSTRAKT<span style={{ color: "#F2997C" }}>.</span>
           </span>
           <p style={{ margin: 0, maxWidth: "34ch", fontSize: 15, lineHeight: 1.6, color: "rgba(250,250,250,.68)" }}>
             Sanepa, Lalitpur, Nepal

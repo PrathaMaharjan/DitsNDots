@@ -145,7 +145,7 @@ export default function SelectedWorkV2({ data }: SelectedWorkV2Props) {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 16, minWidth: 220, flex: 1, maxWidth: 420, paddingBottom: 10 }}>
             <div style={{ flex: 1, height: 2, background: "#242424", overflow: "hidden" }}>
-              <div ref={barRef} style={{ height: "100%", width: "0%", background: "#9A78F5" }} />
+              <div ref={barRef} style={{ height: "100%", width: "0%", background: "#F2997C" }} />
             </div>
             <a href="#contact" style={{ fontSize: 12, fontWeight: 700, letterSpacing: ".18em", color: "#F7F6F3", whiteSpace: "nowrap", pointerEvents: "auto" }}>
               ALL PROJECTS →
@@ -169,7 +169,7 @@ export default function SelectedWorkV2({ data }: SelectedWorkV2Props) {
             }}
           >
             {project.category && (
-              <span style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: ".22em", color: "#9A78F5", marginBottom: 8 }}>
+              <span style={{ display: "block", fontSize: 11, fontWeight: 700, letterSpacing: ".22em", color: "#F2997C", marginBottom: 8 }}>
                 {project.category.toUpperCase()}
               </span>
             )}
@@ -208,7 +208,7 @@ export default function SelectedWorkV2({ data }: SelectedWorkV2Props) {
               height: 52,
               padding: "0 26px",
               borderRadius: 999,
-              background: "#501EBD",
+              background: "#E84610",
               color: "#ffffff",
               fontSize: 15,
               fontWeight: 600,

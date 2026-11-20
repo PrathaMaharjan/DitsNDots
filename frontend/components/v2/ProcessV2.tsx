@@ -29,7 +29,7 @@ export default function ProcessV2({ data }: ProcessV2Props) {
         </div>
         <div style={{ position: "relative", paddingLeft: "clamp(24px,3vw,52px)" }}>
           <div style={{ position: "absolute", left: 0, top: 6, bottom: 6, width: 2, background: LINE }}>
-            <div data-proc-fill="1" style={{ width: "100%", height: "0%", background: "#501EBD" }} />
+            <div data-proc-fill="1" style={{ width: "100%", height: "0%", background: "#E84610" }} />
           </div>
           {steps.map((step, i) => (
             <div
@@ -51,7 +51,7 @@ export default function ProcessV2({ data }: ProcessV2Props) {
                   transition: "background .4s,transform .4s",
                 }}
               />
-              <span style={{ display: "block", fontSize: 12, fontWeight: 700, letterSpacing: ".2em", color: "#501EBD", marginBottom: 12 }}>{step.id}</span>
+              <span style={{ display: "block", fontSize: 12, fontWeight: 700, letterSpacing: ".2em", color: "#E84610", marginBottom: 12 }}>{step.id}</span>
               <h3 style={{ margin: "0 0 10px", fontFamily: displayFont, fontWeight: 700, fontSize: "clamp(24px,3.1vw,46px)", lineHeight: 1.02, letterSpacing: "-.03em" }}>
                 {step.title}
               </h3>

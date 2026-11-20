@@ -216,7 +216,7 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
           cur.style.opacity = "1";
           cur.style.width = "112px";
           cur.style.height = "112px";
-          cur.style.background = "#501EBD";
+          cur.style.background = "#E84610";
           if (label) label.style.opacity = "1";
         } else {
           cur.style.opacity = "0";
@@ -411,7 +411,7 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
           s.style.opacity = on ? "1" : "0.4";
           const dot = s.querySelector<HTMLElement>("[data-step-dot]");
           if (dot) {
-            dot.style.background = on ? "#501EBD" : "#E2E1DB";
+            dot.style.background = on ? "#E84610" : "#E2E1DB";
             dot.style.transform = on ? "scale(1.35)" : "scale(1)";
           }
         });

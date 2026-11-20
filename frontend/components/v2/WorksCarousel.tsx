@@ -76,7 +76,7 @@ const T = BG_IS_DARK
       // Brand pool behind the ring, then a vertical scrim that darkens the
       // top for the heading and the floor for the band — the middle stays
       // open so the wall texture, leaf shadows and frames still read.
-      wash: "radial-gradient(120% 80% at 50% 46%, rgba(80,30,189,.20) 0%, rgba(80,30,189,.05) 40%, rgba(14,14,14,0) 72%), linear-gradient(180deg, rgba(11,10,9,.72) 0%, rgba(11,10,9,.30) 30%, rgba(11,10,9,.22) 58%, rgba(11,10,9,.62) 100%)",
+      wash: "radial-gradient(120% 80% at 50% 46%, rgba(232, 70, 16,.20) 0%, rgba(232, 70, 16,.05) 40%, rgba(14,14,14,0) 72%), linear-gradient(180deg, rgba(11,10,9,.72) 0%, rgba(11,10,9,.30) 30%, rgba(11,10,9,.22) 58%, rgba(11,10,9,.62) 100%)",
       cardShadow: "0 20px 48px rgba(0,0,0,0.58), 0 0 0 1px rgba(247,246,243,0.16)",
       cardHoverShadow: `0 34px 74px rgba(0,0,0,0.62), 0 0 0 1px ${BRAND_LIGHT}`,
       panelBg: "rgba(18,16,20,0.72)",
@@ -92,12 +92,12 @@ const T = BG_IS_DARK
       // Cream artwork: type drops to ink, and the card shadows warm up and
       // lighten — a black drop shadow on cream reads as grime, not depth.
       field: "#EFE9E0",
-      eyebrow: "#501EBD",
+      eyebrow: "#E84610",
       heading: "#141210",
       body: "rgba(32,28,24,.72)",
       wash: "linear-gradient(180deg, rgba(243,238,231,.86) 0%, rgba(243,238,231,.34) 34%, rgba(238,231,222,.30) 68%, rgba(232,224,213,.72) 100%)",
       cardShadow: "0 18px 44px rgba(84,64,44,0.22), 0 0 0 1px rgba(32,28,24,0.10)",
-      cardHoverShadow: "0 30px 68px rgba(84,64,44,0.30), 0 0 0 1px rgba(80,30,189,0.55)",
+      cardHoverShadow: "0 30px 68px rgba(84,64,44,0.30), 0 0 0 1px rgba(232, 70, 16,0.55)",
       panelBg: "rgba(253,251,247,0.78)",
       panelBorder: "1px solid rgba(32,28,24,0.12)",
       panelShadow: "0 24px 60px rgba(84,64,44,0.24)",

@@ -153,7 +153,19 @@ export default function Home() {
         }
       })
       .catch((err) => {
-        console.warn("[content] fetch failed:", err);
+        console.warn("[content] fetch failed, applying static content fallback:", err);
+        setHero((prev) => prev || (heroContent as any));
+        setPosition((prev) => prev || (positionContent as any));
+        setLogos((prev) => prev || (logosContent as any));
+        setCapabilities((prev) => prev || (capabilitiesContent as any));
+        setWork((prev) => prev || (workContent as any));
+        setProcess((prev) => prev || (processContent as any));
+        setPeople((prev) => prev || (peopleContent as any));
+        setFaq((prev) => prev || (faqContent as any));
+        setStats((prev) => prev || (statsContent as any));
+        setTestimonials((prev) => prev || (testimonialsContent as any));
+        setCareers((prev) => prev || (careersContent as any));
+        setContact((prev) => prev || (contactContent as any));
       })
       .finally(() => setStatus("ready"));
   }, []);
@@ -206,8 +218,8 @@ export default function Home() {
       style={{
         "--ab-bg": "#F7F6F3",
         "--ab-ink": "#0E0E0E",
-        "--ab-brand": "#501EBD",
-        "--ab-brand-light": "#9A78F5",
+        "--ab-brand": "#E84610",
+        "--ab-brand-light": "#F2997C",
         "--ab-card": "#EAE9E4",
         "--ab-ink-deep": "#100A1E",
         fontFamily: "var(--font-manrope), system-ui, sans-serif",

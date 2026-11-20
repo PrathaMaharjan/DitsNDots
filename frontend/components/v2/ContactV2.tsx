@@ -56,8 +56,8 @@ export default function ContactV2({ data }: ContactV2Props) {
         >
           <div data-rv="up">
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 18 }}>
-              <span aria-hidden style={{ width: 28, height: 1, background: "#9A78F5", display: "block" }} />
-              <span style={{ fontSize: 12, letterSpacing: ".18em", textTransform: "uppercase", color: "#9A78F5" }}>
+              <span aria-hidden style={{ width: 28, height: 1, background: "#F2997C", display: "block" }} />
+              <span style={{ fontSize: 12, letterSpacing: ".18em", textTransform: "uppercase", color: "#F2997C" }}>
                 Project in mind?
               </span>
             </div>
@@ -86,7 +86,7 @@ export default function ContactV2({ data }: ContactV2Props) {
                 <span>
                   {line1.includes("Let's") ? (
                     <>
-                      <span style={{ color: "#9A78F5" }}>Let&apos;s</span>
+                      <span style={{ color: "#F2997C" }}>Let&apos;s</span>
                       {line1.replace("Let's", "")}
                     </>
                   ) : (

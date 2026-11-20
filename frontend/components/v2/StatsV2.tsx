@@ -13,7 +13,7 @@ interface StatsV2Props {
   data?: StatItem[];
 }
 
-const ACCENT_COLORS = [INK, "#501EBD", INK, INK];
+const ACCENT_COLORS = [INK, "#E84610", INK, INK];
 
 export default function StatsV2({ data }: StatsV2Props) {
   const items = data && data.length ? data : [];

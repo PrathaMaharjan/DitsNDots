@@ -543,6 +543,250 @@ async function seedDatabase() {
 
 let cachedContentData: any = null;
 
+const DEFAULT_FALLBACK_CONTENT = {
+  hero: {
+    location: "SANEPA, NEPAL — DALLAS, TX",
+    headlineLine1: "DESIGN.",
+    subHeadlineLines: ["BUILD.", "GROW."],
+    headlineLines: ["DESIGN.", "BUILD.", "GROW."],
+    description: "From web solutions and digital marketing to video, music, 3D and graphic design."
+  },
+  position: {
+    statement: "We build the digital side of a business and the creative work that surrounds it — the site, the identity, the campaign and the content, from one team."
+  },
+  capabilities: {
+    pillars: {
+      digital: {
+        id: "01",
+        label: "LEADING",
+        title: "DIGITAL",
+        description: "Web solutions — high-performance engineering and UI/UX systems, in the studio's own words.",
+        imageUrl: "",
+        tag: "Web Solutions",
+        badge: "LEAD PILLAR — SWAPPABLE SLOT",
+        isBookmarked: false
+      },
+      identity: {
+        id: "02",
+        label: "SHAPING",
+        title: "IDENTITY",
+        description: "Brand architecture — premium corporate design systems, bespoke typography, and art direction.",
+        imageUrl: "",
+        tag: "Brand Architecture",
+        badge: "BRAND SYSTEM — SWAPPABLE SLOT",
+        isBookmarked: false
+      },
+      campaign: {
+        id: "03",
+        label: "ENGAGING",
+        title: "CAMPAIGN",
+        description: "Creative storytelling — digital marketing, conversion funnel optimization, and content strategies.",
+        imageUrl: "",
+        tag: "Campaign Launch",
+        badge: "MARKETING — SWAPPABLE SLOT",
+        isBookmarked: false
+      },
+      creative: {
+        id: "04",
+        label: "EXPRESSING",
+        title: "CREATIVE",
+        description: "Multimedia assets — 3D modeling, premium video production, sound design, and motion graphics.",
+        imageUrl: "",
+        tag: "Motion & 3D",
+        badge: "CREATIVE — SWAPPABLE SLOT",
+        isBookmarked: false
+      }
+    }
+  },
+  work: {
+    projects: [
+      {
+        id: 1,
+        title: "Zuus x Shake Shaq",
+        subtitle: "Cold-pressed juice x milkshake collab campaign",
+        serviceType: "Campaign Launch",
+        startDate: "2024",
+        endDate: "Present",
+        client: "Zuus",
+        clientType: "brand",
+        ratio: "16:10",
+        category: "Campaign",
+        logoUrl: "",
+        thumbnailUrl: "/images/zuus-shakeshaq-campaign.png",
+        videoThumbnailUrl: "",
+        isBookmarked: true,
+        bodySections: []
+      },
+      {
+        id: 2,
+        title: "Serena Moon",
+        subtitle: "Private digital exhibition & membership site",
+        serviceType: "Web Solutions",
+        startDate: "2024",
+        endDate: "Present",
+        client: "Serena Moon",
+        clientType: "brand",
+        ratio: "2:3",
+        category: "Digital",
+        logoUrl: "",
+        thumbnailUrl: "/images/serena-moon-website.png",
+        videoThumbnailUrl: "",
+        isBookmarked: true,
+        bodySections: []
+      },
+      {
+        id: 3,
+        title: "Arbitrary",
+        subtitle: "Music platform — records, events, artists",
+        serviceType: "Web & Music",
+        startDate: "2023",
+        endDate: "2024",
+        client: "Arbitrary",
+        clientType: "brand",
+        ratio: "4:3",
+        category: "Digital",
+        logoUrl: "",
+        thumbnailUrl: "/images/arbitrary-website.png",
+        videoThumbnailUrl: "",
+        isBookmarked: false,
+        bodySections: []
+      },
+      {
+        id: 4,
+        title: "APEX IDENTITY",
+        subtitle: "Corporate brand guidelines",
+        serviceType: "Brand Architecture",
+        startDate: "2023",
+        endDate: "2024",
+        client: "Apex",
+        clientType: "brand",
+        ratio: "16:10",
+        category: "Design",
+        logoUrl: "",
+        thumbnailUrl: "/images/zuus-shakeshaq-campaign.png",
+        videoThumbnailUrl: "",
+        isBookmarked: false,
+        bodySections: []
+      },
+      {
+        id: 5,
+        title: "COSMOS AUDIO",
+        subtitle: "3D soundscapes & motion scoring",
+        serviceType: "Creative & Audio",
+        startDate: "2023",
+        endDate: "2023",
+        client: "Cosmos",
+        clientType: "brand",
+        ratio: "3:4",
+        category: "Creative",
+        logoUrl: "",
+        thumbnailUrl: "/images/serena-moon-website.png",
+        videoThumbnailUrl: "",
+        isBookmarked: false,
+        bodySections: []
+      }
+    ]
+  },
+  faq: {
+    badge: "GOT QUESTIONS?",
+    title: "FREQUENTLY ASKED QUESTIONS",
+    description: "Find answers to the most common questions about Abstrakt Creation and our comprehensive digital, creative, and branding services.",
+    buttonText: "VIEW ALL FAQS +",
+    questions: [
+      {
+        question: "What services does Abstrakt Creation offer?",
+        answer: "We provide end-to-end design, digital, growth, and creative solutions. This includes web application development, UI/UX systems, brand identity guidelines, marketing campaigns, 3D animations, video production, and sound design."
+      },
+      {
+        question: "How long does a typical project take?",
+        answer: "Timelines vary depending on scope. A standard brand design or website development project usually takes between 4 to 8 weeks. Larger campaigns or complex Web3 platforms can take 12 weeks or more. We establish clear phases during planning."
+      },
+      {
+        question: "Do you work with international clients?",
+        answer: "Yes, we work globally. We are physically situated in Lalitpur, Nepal and Dallas, Texas, allowing us to collaborate seamlessly with clients across the US, Europe, and South Asia."
+      },
+      {
+        question: "What is your pricing structure?",
+        answer: "We operate on flat project-based pricing or ongoing monthly retainers depending on what fits your workflow. Every project starts with a detailed scoping phase where we provide a transparent, all-inclusive budget before starting."
+      }
+    ]
+  },
+  process: {
+    steps: [
+      { id: "01", title: "Brief", description: "A call, a scope, a number. No proposal theatre." },
+      { id: "02", title: "Plan", description: "Structure, references and a budget you sign off." },
+      { id: "03", title: "Make", description: "Design, build, shoot, edit. One team, in house." },
+      { id: "04", title: "Launch", description: "Ship it, measure it, keep it running." }
+    ]
+  },
+  people: {
+    team: [
+      { name: "Aabhiskar KC", role: "CEO", description: "Runs the studio and sits on every brief. If the scope changes, he is the one who tells you.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: true, socials: [] },
+      { name: "Yashmine Gurung", role: "Creative Lead", description: "Holds the art direction across brand, campaign and film so the work looks like one studio made it.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: true, socials: [] },
+      { name: "Nisika Shrestha", role: "People & Operations", description: "Hiring, onboarding and the reason projects have the right people on them in the right week.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: false, socials: [] },
+      { name: "Nikhil Tuladhar", role: "Engineering", description: "Builds and maintains what we ship. Infrastructure, performance and the parts nobody sees.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: false, socials: [] }
+    ],
+    extraCount: 6
+  },
+  logos: [
+    { id: 1, name: "VERTEX", imageUrl: "" },
+    { id: 2, name: "KINETIC", imageUrl: "" },
+    { id: 3, name: "APEX", imageUrl: "" },
+    { id: 4, name: "SPECTRUM", imageUrl: "" },
+    { id: 5, name: "COSMOS", imageUrl: "" },
+    { id: 6, name: "QUANTUM", imageUrl: "" },
+    { id: 7, name: "NEXUS", imageUrl: "" },
+    { id: 8, name: "ELEVATE", imageUrl: "" }
+  ],
+  stats: [
+    { id: 1, value: 30, suffix: "+", display: undefined, label: "Projects Delivered" },
+    { id: 2, value: 15, suffix: "+", display: undefined, label: "Clients Worked With" },
+    { id: 3, value: 6, suffix: "+", display: undefined, label: "Creative Capabilities" },
+    { id: 4, value: 0, suffix: "", display: "∞", label: "Ideas Turned Real" }
+  ],
+  testimonials: [
+    { id: 1, quote: "They rebuilt the site and the brand in the same pass, so nothing felt bolted on. First month after launch, enquiries doubled.", authorName: "Kiran Gurung", authorRole: "Founder, Vertex", theme: "light" },
+    { id: 2, quote: "The build is stable and the handover was clean. Our own team picked it up in a week without a single call.", authorName: "Sushma Bhandari", authorRole: "Product Lead, Kinetic", theme: "light" },
+    { id: 3, quote: "We came for a video and left with a whole system: identity, site, launch campaign. One team, one invoice, one standard.", authorName: "Daniel Reyes", authorRole: "CMO, Apex", theme: "light" },
+    { id: 4, quote: "Timelines held. That is rarer than it should be, and it is why we are on the third project with them.", authorName: "Priya Adhikari", authorRole: "Director, Spectrum", theme: "dark" }
+  ],
+  careers: {
+    badge: "CAREERS",
+    title: "We are hiring",
+    description: "Send the project you are proudest of. If it is good we will find a seat for you, listed role or not.",
+    roles: [
+      { id: 1, title: "Frontend Engineer", location: "Lalitpur", type: "Full-time" },
+      { id: 2, title: "Motion Designer", location: "Hybrid", type: "Full-time" },
+      { id: 3, title: "Growth Strategist", location: "Dallas", type: "Contract" }
+    ]
+  },
+  contact: {
+    headlineLine1: "Let's make",
+    headlineLine2: "the thing.",
+    description: "Tell us what you are trying to launch and roughly when. You will get a scope and a number, not a deck.",
+    email: "abstraktcreation@gmail.com",
+    phone: "+977 9823901866",
+    skills: [
+      { id: 1, label: "React", accent: true },
+      { id: 2, label: "Next.js", accent: false },
+      { id: 3, label: "Web Solutions", accent: true },
+      { id: 4, label: "API Integration", accent: true },
+      { id: 5, label: "Dashboards", accent: false },
+      { id: 6, label: "3D & Animation", accent: false },
+      { id: 7, label: "Social Media", accent: true },
+      { id: 8, label: "Music Production", accent: true },
+      { id: 9, label: "Video Production", accent: false },
+      { id: 10, label: "Graphic Design", accent: true },
+      { id: 11, label: "UI/UX Design", accent: true },
+      { id: 12, label: "System Architecture", accent: false },
+      { id: 13, label: "Digital Marketing", accent: false },
+      { id: 14, label: "Creative", accent: false },
+      { id: 15, label: "Motion Design", accent: true },
+      { id: 16, label: "Brand Systems", accent: false }
+    ]
+  }
+};
+
 // REST GET: Fetch all sections
 app.get('/api/content', async (req, res) => {
   try {
@@ -801,8 +1045,9 @@ app.get('/api/content', async (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
     res.json(responseData);
   } catch (error) {
-    console.error("Failed to load site content from database tables:", error);
-    res.status(500).json({ error: "Failed to load dynamic site content" });
+    console.warn("Database unavailable or uninitialized; serving default site content fallback.");
+    res.setHeader('Cache-Control', 'public, max-age=10');
+    res.json(DEFAULT_FALLBACK_CONTENT);
   }
 });
 

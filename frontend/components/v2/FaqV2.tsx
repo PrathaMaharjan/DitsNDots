@@ -71,8 +71,8 @@ export default function FaqV2({ data }: FaqV2Props) {
                   aria-hidden="true"
                   style={{ flex: "0 0 auto", position: "relative", width: 16, height: 16 }}
                 >
-                  <span style={{ position: "absolute", top: 7, left: 0, width: 16, height: 2, background: "#501EBD" }} />
-                  <span style={{ position: "absolute", left: 7, top: 0, width: 2, height: 16, background: "#501EBD" }} />
+                  <span style={{ position: "absolute", top: 7, left: 0, width: 16, height: 2, background: "#E84610" }} />
+                  <span style={{ position: "absolute", left: 7, top: 0, width: 2, height: 16, background: "#E84610" }} />
                 </span>
                 <span
                   style={{
@@ -98,7 +98,7 @@ export default function FaqV2({ data }: FaqV2Props) {
                     width: 38,
                     height: 38,
                     borderRadius: 999,
-                    background: "#501EBD",
+                    background: "#E84610",
                     color: "#fff",
                     fontSize: 15,
                     lineHeight: 1,

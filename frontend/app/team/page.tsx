@@ -137,8 +137,8 @@ export default function TeamPage() {
       style={{
         "--ab-bg": "#F7F6F3",
         "--ab-ink": "#0E0E0E",
-        "--ab-brand": "#501EBD",
-        "--ab-brand-light": "#9A78F5",
+        "--ab-brand": "#E84610",
+        "--ab-brand-light": "#F2997C",
         "--ab-card": "#EAE9E4",
         "--ab-ink-deep": "#100A1E",
         fontFamily: "var(--font-manrope), system-ui, sans-serif",

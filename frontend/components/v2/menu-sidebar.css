@@ -24,8 +24,8 @@
   /* Mirrors tokens.ts — INK, BG, BRAND, BRAND_LIGHT. */
   --ms-ink: #0e0e0e;
   --ms-bg: #f7f6f3;
-  --ms-brand: #501ebd;
-  --ms-brand-light: #9a78f5;
+  --ms-brand: #e84610;
+  --ms-brand-light: #f2997c;
   /* Artboard-specific tones with no tokens.ts equivalent. */
   --ms-panel: #17171b;
   --ms-muted: #c9c9c4;
@@ -125,7 +125,7 @@
 }
 
 .ms2__mark-dot {
-  color: rgba(80, 30, 189, 0.42);
+  color: rgba(232, 70, 16, 0.42);
 }
 
 /* ---------- Panel ---------- */
