@@ -35,9 +35,14 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "DitsNDots ",
+  title: "DitsNDots",
   description:
     "Your end-to-end partner for Web Development, AI Solutions, and Creative Media. We build the future, one dot at a time.",
+  icons: {
+    icon: "/images/logo.png",
+    shortcut: "/images/logo.png",
+    apple: "/images/logo.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
