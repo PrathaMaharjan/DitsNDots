@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import ProjectModal, { ProjectData } from "./ProjectModal";
 import { LogoData } from "./LogoModal";
+import { getProjectSlug } from "../../lib/v2/workProjects";
 
 interface WorkFormProps {
   data: {
@@ -14,89 +15,36 @@ interface WorkFormProps {
   disabled?: boolean;
 }
 
-function syncProjectLogo(
-  project: ProjectData,
-  prevProject: ProjectData | null,
-  currentLogos: LogoData[] = []
-): LogoData[] {
-  let updatedLogos = [...currentLogos];
-  const newBrandName = (project.client || project.title || "").trim().toUpperCase();
-  const prevBrandName = prevProject ? (prevProject.client || prevProject.title || "").trim().toUpperCase() : "";
-
-  if (project.logoUrl && newBrandName) {
-    const existingIdx = updatedLogos.findIndex(
-      (l) => l.name.toUpperCase() === newBrandName || (prevBrandName && l.name.toUpperCase() === prevBrandName)
-    );
-    if (existingIdx >= 0) {
-      updatedLogos[existingIdx] = {
-        ...updatedLogos[existingIdx],
-        name: newBrandName,
-        imageUrl: project.logoUrl,
-      };
-    } else {
-      updatedLogos.push({
-        name: newBrandName,
-        imageUrl: project.logoUrl,
-      });
-    }
-  } else if (prevBrandName && !project.logoUrl) {
-    updatedLogos = updatedLogos.filter((l) => l.name.toUpperCase() !== prevBrandName);
-  }
-
-  return updatedLogos;
-}
-
-function removeProjectLogo(
-  projectToDelete: ProjectData,
-  currentLogos: LogoData[] = []
-): LogoData[] {
-  const brandName = (projectToDelete.client || projectToDelete.title || "").trim().toUpperCase();
-  if (!brandName && !projectToDelete.logoUrl) return currentLogos;
-
-  return currentLogos.filter((l) => {
-    const lName = l.name.trim().toUpperCase();
-    if (brandName && lName === brandName) return false;
-    if (projectToDelete.logoUrl && l.imageUrl === projectToDelete.logoUrl) return false;
-    return true;
-  });
-}
-
-export default function WorkForm({ data, logosData = [], onChange, onStartEditing, disabled = false }: WorkFormProps) {
+export default function WorkForm({
+  data,
+  logosData = [],
+  onChange,
+  onStartEditing,
+  disabled = false,
+}: WorkFormProps) {
   const [editingProjectIndex, setEditingProjectIndex] = useState<number | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [categoryDraft, setCategoryDraft] = useState<string>("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   const projectsList = data?.projects || [];
   const bookmarkedCount = projectsList.filter((p) => p.isBookmarked).length;
 
-  const getProjectDateVal = (p: ProjectData) => {
-    const end = (p.endDate || "").trim().toLowerCase();
-    const start = (p.startDate || "").trim().toLowerCase();
-    if (end.includes("present") || end.includes("current") || start.includes("present") || start.includes("current")) {
-      return 999999;
-    }
-    const matches = `${end} ${start}`.match(/\b(19|20)\d{2}\b/g);
-    if (matches && matches.length > 0) {
-      return Math.max(...matches.map((y) => parseInt(y, 10)));
-    }
-    return 0;
-  };
-
-  const sortProjects = (list: ProjectData[]) => {
-    return [...list].sort((a, b) => {
-      const aBM = Boolean(a.isBookmarked);
-      const bBM = Boolean(b.isBookmarked);
-      if (aBM !== bBM) {
-        return aBM ? -1 : 1;
-      }
-      const dateA = getProjectDateVal(a);
-      const dateB = getProjectDateVal(b);
-      if (dateA !== dateB) {
-        return dateB - dateA;
-      }
-      return 0;
+  const existingCategories = useMemo(() => {
+    const set = new Set<string>();
+    projectsList.forEach((p) => {
+      const cat = (p.category || p.serviceType || "").trim();
+      if (cat) set.add(cat);
     });
-  };
+    return Array.from(set);
+  }, [projectsList]);
+
+  const filterCategories = useMemo(
+    () => ["All", ...existingCategories],
+    [existingCategories]
+  );
 
   const handleStartEdit = (index: number) => {
     if (onStartEditing) onStartEditing();
@@ -107,8 +55,8 @@ export default function WorkForm({ data, logosData = [], onChange, onStartEditin
     const targetProject = projectsList[index];
     const currentlyBookmarked = Boolean(targetProject.isBookmarked);
 
-    if (!currentlyBookmarked && bookmarkedCount >= 5) {
-      setToastMsg("bookmark limit reached");
+    if (!currentlyBookmarked && bookmarkedCount >= 6) {
+      setToastMsg("Bookmark limit reached (max 6 featured projects)");
       setTimeout(() => setToastMsg(null), 4000);
       return;
     }
@@ -119,31 +67,34 @@ export default function WorkForm({ data, logosData = [], onChange, onStartEditin
       i === index ? { ...p, isBookmarked: !currentlyBookmarked } : p
     );
 
-    const reorderedList = sortProjects(updatedList);
-    onChange({ ...data, projects: reorderedList });
+    onChange({ ...data, projects: updatedList });
+  };
+
+  const moveProject = (index: number, direction: "up" | "down") => {
+    const targetIdx = direction === "up" ? index - 1 : index + 1;
+    if (targetIdx < 0 || targetIdx >= projectsList.length) return;
+    if (onStartEditing) onStartEditing();
+
+    const updated = [...projectsList];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIdx, 0, moved);
+    onChange({ ...data, projects: updated });
   };
 
   const handleSaveModal = (updatedProject: ProjectData) => {
     if (onStartEditing) onStartEditing();
     const list = [...projectsList];
-    let prevProject: ProjectData | null = null;
 
     if (isCreatingNew) {
       list.push(updatedProject);
     } else if (editingProjectIndex !== null) {
-      prevProject = projectsList[editingProjectIndex];
-      const isBookmarked = updatedProject.isBookmarked !== undefined 
-        ? updatedProject.isBookmarked 
-        : prevProject?.isBookmarked;
-      
       list[editingProjectIndex] = {
         ...updatedProject,
-        isBookmarked: Boolean(isBookmarked)
+        isBookmarked: Boolean(updatedProject.isBookmarked),
       };
     }
-    const reorderedList = sortProjects(list);
-    const updatedLogos = syncProjectLogo(updatedProject, prevProject, logosData);
-    onChange({ ...data, projects: reorderedList }, updatedLogos);
+
+    onChange({ ...data, projects: list }, logosData);
     setEditingProjectIndex(null);
     setIsCreatingNew(false);
   };
@@ -156,30 +107,82 @@ export default function WorkForm({ data, logosData = [], onChange, onStartEditin
     }
     if (onStartEditing) onStartEditing();
     const list = projectsList.filter((_, i) => i !== index);
-    const updatedLogos = removeProjectLogo(projectToDelete, logosData);
-    onChange({ ...data, projects: list }, updatedLogos);
+    onChange({ ...data, projects: list }, logosData);
+  };
+
+  const handleStartRenameCategory = (cat: string) => {
+    setEditingCategory(cat);
+    setCategoryDraft(cat);
+  };
+
+  const handleSaveRenameCategory = (oldCat: string) => {
+    const nextCat = categoryDraft.trim();
+    setEditingCategory(null);
+    setCategoryDraft("");
+    if (!nextCat || nextCat === oldCat) return;
+
+    if (onStartEditing) onStartEditing();
+    const updatedList = projectsList.map((p) => {
+      const current = (p.category || p.serviceType || "").trim();
+      if (current.toLowerCase() === oldCat.toLowerCase()) {
+        return {
+          ...p,
+          category: nextCat,
+          serviceType: nextCat,
+          subtitle: nextCat,
+        };
+      }
+      return p;
+    });
+
+    onChange({ ...data, projects: updatedList }, logosData);
+    if (activeCategory.toLowerCase() === oldCat.toLowerCase()) {
+      setActiveCategory(nextCat);
+    }
+  };
+
+  const handleDeleteCategory = (catToDelete: string) => {
+    const affectedCount = projectsList.filter(
+      (p) => (p.category || p.serviceType || "").trim().toLowerCase() === catToDelete.toLowerCase()
+    ).length;
+
+    if (
+      !window.confirm(
+        `Delete category "${catToDelete}"?\n\nThe ${affectedCount} project${affectedCount === 1 ? "" : "s"} in this category will remain in "All" as uncategorized.`
+      )
+    ) {
+      return;
+    }
+
+    if (onStartEditing) onStartEditing();
+    const updatedList = projectsList.map((p) => {
+      const current = (p.category || p.serviceType || "").trim();
+      if (current.toLowerCase() === catToDelete.toLowerCase()) {
+        return {
+          ...p,
+          category: "",
+          serviceType: "",
+          subtitle: "",
+        };
+      }
+      return p;
+    });
+
+    onChange({ ...data, projects: updatedList }, logosData);
+    if (activeCategory.toLowerCase() === catToDelete.toLowerCase()) {
+      setActiveCategory("All");
+    }
+    if (editingCategory === catToDelete) {
+      setEditingCategory(null);
+      setCategoryDraft("");
+    }
   };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Toast Alert Message */}
       {toastMsg && (
-        <div className="bg-red-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl shadow-lg flex items-center justify-between animate-in fade-in slide-in-from-top duration-200">
-          <div className="flex items-center gap-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4 text-white shrink-0"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>{toastMsg}</span>
-          </div>
+        <div className="bg-red-600 text-white text-xs font-bold uppercase tracking-wider px-4 py-3 rounded-xl shadow-lg flex items-center justify-between">
+          <span>{toastMsg}</span>
           <button
             type="button"
             onClick={() => setToastMsg(null)}
@@ -190,166 +193,332 @@ export default function WorkForm({ data, logosData = [], onChange, onStartEditin
         </div>
       )}
 
-      <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-        <span className="text-sm font-semibold text-neutral-500 font-mono flex items-center gap-2">
-          Manage Projects ({projectsList.length})
-          <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-mono font-bold">
-            {bookmarkedCount}/5 Bookmarked
-          </span>
-        </span>
-        {!disabled && (
-          <button
-            type="button"
-            onClick={() => setIsCreatingNew(true)}
-            className="text-xs bg-brand/10 hover:bg-brand/20 text-brand px-3.5 py-1.5 rounded-full font-bold transition-all uppercase cursor-pointer"
-          >
-            + Add Project
-          </button>
-        )}
+      {/* Info Banner explaining how Work Admin connects to Homepage, /work, and /work/[slug] */}
+      <div className="bg-neutral-50 border border-neutral-200/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-bold text-neutral-800 uppercase tracking-wide">
+            Work Page &amp; Individual Case Study Manager
+          </p>
+          <p className="text-xs text-neutral-500 mt-0.5">
+            Every project below powers the 3D Homepage Carousel, the 3-column <span className="font-mono font-bold text-brand">/work</span> catalog page (with centered category tabs), and its individual <span className="font-mono font-bold text-brand">/work/[slug]</span> case study page.
+          </p>
+        </div>
+        <a
+          href="/work"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs font-mono font-bold text-brand hover:underline uppercase shrink-0"
+        >
+          Preview /work Page &#8599;
+        </a>
       </div>
 
-      <div className="flex flex-col gap-4">
+      {/* Category Filter Bar (with inline Edit & Delete) + Add Project Button */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {filterCategories.map((cat) => {
+            const active = activeCategory === cat;
+            const isAll = cat === "All";
+            const count = isAll
+              ? projectsList.length
+              : projectsList.filter(
+                  (p) => (p.category || p.serviceType || "").trim().toLowerCase() === cat.toLowerCase()
+                ).length;
+
+            if (!isAll && editingCategory === cat) {
+              return (
+                <div
+                  key={cat}
+                  className="inline-flex items-center gap-1 bg-white border border-brand rounded-full pl-3 pr-1.5 py-1 shadow-xs"
+                >
+                  <input
+                    type="text"
+                    autoFocus
+                    value={categoryDraft}
+                    onChange={(e) => setCategoryDraft(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSaveRenameCategory(cat);
+                      } else if (e.key === "Escape") {
+                        setEditingCategory(null);
+                        setCategoryDraft("");
+                      }
+                    }}
+                    className="w-28 text-xs font-bold text-foreground focus:outline-none bg-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleSaveRenameCategory(cat)}
+                    title="Save category name"
+                    className="w-5 h-5 rounded-full bg-brand text-white text-[10px] font-bold flex items-center justify-center hover:bg-brand/90 cursor-pointer"
+                  >
+                    ✓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingCategory(null);
+                      setCategoryDraft("");
+                    }}
+                    title="Cancel"
+                    className="w-5 h-5 rounded-full bg-neutral-100 text-neutral-500 text-[10px] font-bold flex items-center justify-center hover:bg-neutral-200 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              );
+            }
+
+            if (isAll) {
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                    active
+                      ? "bg-brand text-white shadow-xs"
+                      : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                  }`}
+                >
+                  All ({count})
+                </button>
+              );
+            }
+
+            return (
+              <div
+                key={cat}
+                className={`inline-flex items-center rounded-full text-xs font-bold transition-all ${
+                  active
+                    ? "bg-brand text-white shadow-xs"
+                    : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                }`}
+              >
+                <button
+                  type="button"
+                  onClick={() => setActiveCategory(cat)}
+                  className="pl-3 pr-1.5 py-1.5 cursor-pointer"
+                >
+                  {cat} ({count})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleStartRenameCategory(cat)}
+                  title={`Rename "${cat}"`}
+                  className={`p-1 rounded-full transition-colors cursor-pointer ${
+                    active
+                      ? "text-white/80 hover:text-white hover:bg-white/15"
+                      : "text-neutral-400 hover:text-brand hover:bg-white"
+                  }`}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCategory(cat)}
+                  title={`Delete "${cat}"`}
+                  className={`p-1 mr-1 rounded-full transition-colors cursor-pointer ${
+                    active
+                      ? "text-white/80 hover:text-white hover:bg-white/15"
+                      : "text-neutral-400 hover:text-red-500 hover:bg-white"
+                  }`}
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            if (onStartEditing) onStartEditing();
+            setIsCreatingNew(true);
+          }}
+          className="text-xs bg-brand/10 hover:bg-brand hover:text-white text-brand px-4 py-1.5 rounded-full font-bold transition-all uppercase cursor-pointer"
+        >
+          + Add Project
+        </button>
+      </div>
+
+      {/* Projects List matching /work & /work/[slug] */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {projectsList.map((project, index) => {
-          const descCount = (project.bodySections || []).filter((s) => s.type === "description").length;
-          const mediaCount = (project.bodySections || []).filter((s) => s.type === "media").length;
+          const cat = (project.category || project.serviceType || "Project").trim();
+          if (
+            activeCategory !== "All" &&
+            cat.toLowerCase() !== activeCategory.toLowerCase()
+          ) {
+            return null;
+          }
+
+          const coverImg =
+            project.thumbnailUrl || (project as any).image || project.videoThumbnailUrl || "";
+          const slug = getProjectSlug(project, index);
+
+          // Extract short description, proof URL, and extra gallery image count from bodySections
+          let shortDesc = "";
+          let proofUrl = "";
+          let extraImagesCount = 0;
+          (project.bodySections || []).forEach((sec) => {
+            if (sec?.type === "description") {
+              if (!shortDesc && sec.description) shortDesc = sec.description;
+              if (!proofUrl && /^https?:\/\//i.test((sec.subTitle || "").trim())) {
+                proofUrl = (sec.subTitle || "").trim();
+              }
+            }
+            if (sec?.mediaUrl) extraImagesCount += 1;
+            if (Array.isArray(sec?.mediaUrls)) extraImagesCount += sec.mediaUrls.length;
+          });
 
           return (
             <div
-              key={index}
-              className={`border rounded-xl p-5 flex items-center justify-between gap-4 relative group transition-all ${
+              key={`${project.id ?? "new"}-${index}`}
+              className={`border rounded-2xl overflow-hidden flex flex-col justify-between transition-all bg-white ${
                 project.isBookmarked
-                  ? "border-amber-300 bg-amber-50/40 shadow-sm"
-                  : "border-neutral-200/80 bg-neutral-50/50"
+                  ? "border-amber-300 ring-1 ring-amber-200/60"
+                  : "border-neutral-200/90 hover:border-neutral-300 shadow-xs"
               }`}
             >
-              <div className="flex flex-col gap-1.5 flex-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  {project.logoUrl && (
-                    <img src={project.logoUrl} alt="Logo" className="h-6 w-auto object-contain" />
+              {/* Top Image Preview */}
+              <div>
+                <div className="relative h-44 w-full bg-neutral-100 border-b border-neutral-100 overflow-hidden">
+                  {coverImg ? (
+                    <img
+                      src={coverImg}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs font-mono text-neutral-400 uppercase">
+                      No Cover Image
+                    </div>
                   )}
-                  <h4 className="text-base font-black uppercase text-foreground">
-                    {project.title || "UNTITLED PROJECT"}
-                  </h4>
+
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                    <span className="bg-neutral-900/80 backdrop-blur-md text-white text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {cat}
+                    </span>
+                    {extraImagesCount > 0 && (
+                      <span className="bg-white/90 backdrop-blur-md text-neutral-800 text-[10px] font-mono font-bold px-2.5 py-1 rounded-full">
+                        +{extraImagesCount} gallery img{extraImagesCount > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </div>
+
                   {project.isBookmarked && (
-                    <span className="text-[10px] font-mono font-bold bg-amber-500 text-white px-2 py-0.5 rounded uppercase flex items-center gap-1">
-                      ★ BOOKMARKED
-                    </span>
-                  )}
-                  {project.category && (
-                    <span className="text-[10px] font-mono font-bold bg-brand/10 text-brand px-2 py-0.5 rounded uppercase">
-                      {project.category}
-                    </span>
-                  )}
-                  {project.client && (
-                    <span className="text-[10px] font-mono font-bold bg-neutral-200 text-neutral-700 px-2 py-0.5 rounded uppercase">
-                      Client: {project.client} ({project.clientType || "brand"})
+                    <span className="absolute top-3 right-3 bg-amber-500 text-white text-[10px] font-mono font-bold px-2.5 py-1 rounded-full uppercase">
+                      ★ Featured
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-neutral-500">{project.subtitle || "No subtitle provided"}</p>
+                {/* Card Body */}
+                <div className="p-4 flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-base font-black text-foreground truncate">
+                      {project.title || "Untitled Project"}
+                    </h4>
+                    <a
+                      href={`/work/${slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-mono font-bold text-brand hover:underline shrink-0"
+                      title="Open individual work page"
+                    >
+                      /work/{slug} &#8599;
+                    </a>
+                  </div>
 
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] font-mono text-neutral-400 mt-1">
-                  {project.serviceType && <span>Service: {project.serviceType}</span>}
-                  {(project.startDate || project.endDate) && (
-                    <span>
-                      Timeline: {project.startDate || "N/A"} — {project.endDate || "N/A"}
-                    </span>
+                  <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed">
+                    {shortDesc || "Default case study description active — click Edit to customize."}
+                  </p>
+
+                  {proofUrl && (
+                    <div className="text-[11px] font-mono text-brand truncate mt-1">
+                      Proof Link: {proofUrl}
+                    </div>
                   )}
-                  <span>
-                    Body: {project.bodySections?.length || 0} Sections ({descCount} Text, {mediaCount} Media)
-                  </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                {/* Bookmark Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => toggleBookmark(index)}
-                  className={`p-2.5 rounded-lg transition-all cursor-pointer shadow-sm border ${
-                    project.isBookmarked
-                      ? "bg-amber-500 border-amber-500 text-white hover:bg-amber-600"
-                      : "bg-white border-neutral-200 text-neutral-600 hover:border-amber-400 hover:text-amber-500"
-                  }`}
-                  title={project.isBookmarked ? "Remove bookmark" : "Bookmark project to move to top"}
-                  aria-label={project.isBookmarked ? "Remove bookmark" : "Bookmark project"}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill={project.isBookmarked ? "currentColor" : "none"}
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
+              {/* Card Action Footer */}
+              <div className="px-4 py-3 bg-neutral-50/70 border-t border-neutral-100 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveProject(index, "up")}
+                    disabled={index === 0}
+                    className="p-1.5 rounded-lg bg-white border border-neutral-200 text-neutral-500 hover:text-neutral-900 disabled:opacity-30 cursor-pointer text-xs font-bold"
+                    title="Move earlier"
                   >
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
-                  </svg>
-                </button>
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveProject(index, "down")}
+                    disabled={index === projectsList.length - 1}
+                    className="p-1.5 rounded-lg bg-white border border-neutral-200 text-neutral-500 hover:text-neutral-900 disabled:opacity-30 cursor-pointer text-xs font-bold"
+                    title="Move later"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleBookmark(index)}
+                    className={`p-1.5 rounded-lg border text-xs font-bold cursor-pointer transition-colors ${
+                      project.isBookmarked
+                        ? "bg-amber-500 border-amber-500 text-white"
+                        : "bg-white border-neutral-200 text-neutral-400 hover:text-amber-500"
+                    }`}
+                    title={project.isBookmarked ? "Unpin featured project" : "Pin project to top"}
+                  >
+                    ★
+                  </button>
+                </div>
 
-                {/* Delete Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => removeProject(index)}
-                  className="p-2.5 rounded-lg bg-white border border-neutral-200 hover:border-red-500 text-neutral-600 hover:text-red-600 transition-colors cursor-pointer shadow-sm"
-                  title="Delete project"
-                  aria-label="Delete project"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleStartEdit(index)}
+                    className="px-3 py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-brand text-neutral-700 hover:text-brand text-xs font-bold uppercase transition-colors cursor-pointer"
                   >
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-
-                {/* Edit Icon Button */}
-                <button
-                  type="button"
-                  onClick={() => handleStartEdit(index)}
-                  className="p-2.5 rounded-lg bg-white border border-neutral-200 hover:border-brand text-neutral-600 hover:text-brand transition-colors cursor-pointer shadow-sm"
-                  title="Edit project"
-                  aria-label="Edit project"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-4 h-4"
+                    Edit Page
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeProject(index)}
+                    className="px-2.5 py-1.5 rounded-lg bg-white border border-neutral-200 hover:border-red-500 text-neutral-400 hover:text-red-600 text-xs font-bold uppercase transition-colors cursor-pointer"
                   >
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                  </svg>
-                </button>
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           );
         })}
-
-        {projectsList.length === 0 && (
-          <p className="text-sm text-neutral-400 font-mono italic text-center py-8">
-            No projects found. Click &quot;+ Add Project&quot; to create a new project with description &amp; media sections.
-          </p>
-        )}
       </div>
 
-      {/* Modal Render for Editing existing project or Creating new project */}
+      {projectsList.length === 0 && (
+        <p className="text-sm text-neutral-400 font-mono italic text-center py-8">
+          No work projects found. Click &quot;+ Add Project&quot; to add a project to the carousel and /work page.
+        </p>
+      )}
+
+      {/* Modal for Editing existing project or Creating new project */}
       {(isCreatingNew || editingProjectIndex !== null) && (
         <ProjectModal
           project={editingProjectIndex !== null ? projectsList[editingProjectIndex] : null}
+          existingCategories={existingCategories}
           onSave={handleSaveModal}
           onClose={() => {
             setEditingProjectIndex(null);
@@ -360,4 +529,3 @@ export default function WorkForm({ data, logosData = [], onChange, onStartEditin
     </div>
   );
 }
-

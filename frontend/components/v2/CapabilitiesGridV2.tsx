@@ -1,3 +1,6 @@
+"use client";
+
+import React, { useEffect, useRef } from "react";
 import { displayFont } from "./tokens";
 import SectionHeading from "./SectionHeading";
 import {
@@ -5,259 +8,379 @@ import {
   Capability,
   CapabilityData,
   INK,
-  RULE,
-  TILE,
   dim,
-  serif,
   toCapabilities,
 } from "./section-shared";
-
-/**
- * Capabilities — bento variant.
- *
- * The homepage's capability section, rendering the four CMS `pillars` as the
- * composed look. Layout and motion come from the "Abstrakt Creations Work
- * Section" Claude Design handoff, re-themed onto the studio's tokens (ink
- * ground, brand purple accent, cream type).
- *
- * The `capabilities` table carries a real `image_url` column, so a pillar can
- * be illustrated. It defaults to "" and is empty for most rows today, so a
- * pillar without artwork renders a typographic plate built from its own
- * number and title rather than being dropped or showing an empty rectangle —
- * a capability is defined by its copy, not by whether a photo exists yet.
- *
- * Four pillars fill a six-column grid as one 4-wide hero, a stacked pair, and
- * one square crop.
- */
 
 interface CapabilitiesGridV2Props {
   data?: CapabilityData;
 }
 
-/**
- * Capability tile. The name is withheld until hover so the grid reads as one
- * composition at rest, then the scrim, title and tag arrive on a short
- * stagger. `@media (hover: none)` pins the captions open on touch, so the
- * pillars always read in full there; on pointer devices they are hover-only.
- * (The capabilities list that used to state every pillar below this grid was
- * removed 2026-09-06 — if the names need to read at rest on desktop too, this
- * is the gate to drop.)
- *
- * `size` scales the caption with the tile: the 4-wide hero carries
- * display-sized type where a quarter-width crop would have it wrap.
- */
-function Tile({
+/** Slight organic tilt per card in the horizontal overlapped stack, matching Huge's deck. */
+const CARD_TILTS = [-1.6, 1.15, -1.1, 1.35, -0.85];
+
+function StackCard({
   item,
-  height,
-  size = "sm",
+  index,
+  cardRef,
 }: {
-  item?: Capability;
-  height: number | string;
-  size?: "sm" | "lg";
+  item: Capability;
+  index: number;
+  cardRef: (el: HTMLDivElement | null) => void;
 }) {
-  const large = size === "lg";
-  if (!item) return null;
+  // Alternating dark / cream cards just like the Huge Careers stack
+  const isLightCard = index % 2 === 1;
+  const bg = isLightCard ? "#F5F3EE" : "#111111";
+  const fg = isLightCard ? "#0E0E0E" : "#F7F6F3";
+  const subFg = isLightCard ? "rgba(14, 14, 14, 0.66)" : "rgba(247, 246, 243, 0.68)";
+  const accentColor = isLightCard ? "#0082C8" : "#38BDF8";
+  const border = isLightCard
+    ? "1px solid rgba(14, 14, 14, 0.1)"
+    : "1px solid rgba(247, 246, 243, 0.14)";
+
   return (
-    <a
-      className="ab-tile"
-      href="#capabilities-list"
-      aria-label={`${item.title} — see capability`}
+    <div
+      ref={cardRef}
       style={{
-        position: "relative",
-        display: "block",
-        height,
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "clamp(260px, 26vw, 370px)",
+        height: "clamp(380px, 56vh, 510px)",
+        borderRadius: 22,
+        background: bg,
+        color: fg,
+        border,
+        boxShadow: isLightCard
+          ? "-18px 24px 58px rgba(0, 0, 0, 0.42)"
+          : "-20px 26px 64px rgba(0, 0, 0, 0.62)",
+        padding: "clamp(26px, 2.6vw, 38px)",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
         overflow: "hidden",
-        borderRadius: 4,
-        background: TILE,
-        color: CREAM,
+        willChange: "transform",
+        userSelect: "none",
       }}
     >
-      {item.image ? (
+      {/* Optional CMS background image if uploaded in admin */}
+      {item.image && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          className="ab-tile__img"
           src={item.image}
           alt={item.title}
           loading="lazy"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
-      ) : (
-        /* Placeholder plate for a pillar with no artwork in the CMS. Built
-           from the pillar's own number and title so it reads as deliberate
-           rather than as a failed image — and it still carries the tile's
-           hover treatment, so the grid behaves uniformly either way. */
-        <div
-          className="ab-tile__img"
-          aria-hidden
           style={{
+            position: "absolute",
+            inset: 0,
             width: "100%",
             height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: `radial-gradient(circle at 32% 24%, rgba(242, 153, 124,.16), rgba(25,25,25,0) 62%), ${TILE}`,
+            objectFit: "cover",
+            opacity: 1,
+            pointerEvents: "none",
           }}
-        >
-          <span
-            style={{
-              fontFamily: serif,
-              fontSize: large ? "clamp(80px,11vw,170px)" : "clamp(48px,6vw,92px)",
-              lineHeight: 1,
-              color: dim(0.13),
-              letterSpacing: "-.03em",
-            }}
-          >
-            {item.num}
-          </span>
-        </div>
+        />
       )}
 
-      <div className="ab-tile__scrim" aria-hidden />
-      <div className="ab-tile__edge" aria-hidden />
-      <div
-        style={{
-          position: "absolute",
-          left: large ? 28 : 20,
-          right: large ? 28 : 20,
-          bottom: large ? 26 : 20,
-          pointerEvents: "none",
-        }}
-      >
-        {/* Title and tag animate as separate elements rather than one caption
-            block, so they can arrive on a short stagger. */}
-        <span
-          className="ab-tile__t"
+      {/* Top Header: Title */}
+      <div style={{ position: "relative", zIndex: 2 }}>
+        <h3
           style={{
+            margin: 0,
             fontFamily: displayFont,
             fontWeight: 700,
-            letterSpacing: "-.03em",
-            fontSize: large ? "clamp(24px,2.4vw,32px)" : "clamp(18px,1.6vw,22px)",
-            lineHeight: 1.1,
+            fontSize: "clamp(26px, 2.35vw, 36px)",
+            lineHeight: 1.05,
+            letterSpacing: "-.035em",
+            color: fg,
           }}
         >
-          {item.title}
-        </span>
+          {item.title.charAt(0).toUpperCase() + item.title.slice(1).toLowerCase()}.
+        </h3>
+      </div>
+
+      {/* Bottom Copy: Lead description + tags (matching Huge's bottom-anchored layout) */}
+      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 14 }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "clamp(14px, 1.05vw, 16px)",
+            fontWeight: 600,
+            lineHeight: 1.48,
+            color: fg,
+          }}
+        >
+          {item.description}
+        </p>
+
         {item.tags.length > 0 && (
-          <span
-            className="ab-tile__c"
+          <p
             style={{
-              fontSize: large ? 12 : 11,
-              letterSpacing: ".14em",
-              textTransform: "uppercase",
-              color: dim(0.6),
-              marginTop: large ? 8 : 6,
+              margin: 0,
+              fontSize: "clamp(12.5px, 0.92vw, 14px)",
+              fontWeight: 500,
+              lineHeight: 1.45,
+              color: subFg,
             }}
           >
             {item.tags.join(" · ")}
-          </span>
+          </p>
         )}
       </div>
-    </a>
+    </div>
   );
 }
 
 export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
   const items = toCapabilities(data);
-  if (!items.length) return null;
+  const runwayRef = useRef<HTMLElement | null>(null);
+  const deckRef = useRef<HTMLDivElement | null>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const bgTextRef = useRef<HTMLDivElement | null>(null);
 
-  // Four slots. Fewer pillars cycle rather than leaving holes in the bento.
-  const at = (i: number) => items[i % items.length];
+  useEffect(() => {
+    const runway = runwayRef.current;
+    const deck = deckRef.current;
+    if (!runway || !deck || !items.length) return;
+
+    const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+    // Smooth ease-out with a gentle spring overshoot bounce at the end of the card's rise
+    const easeOutBounceSpring = (t: number) => {
+      if (t <= 0) return 0;
+      if (t >= 1) return 1;
+      // C1-continuous cubic Hermite with overshoot (~1.032 at t≈0.84) that settles softly to 1.0
+      const c1 = 1.15;
+      const c3 = c1 + 1;
+      const p = t - 1;
+      return 1 + c3 * p * p * p + c1 * p * p;
+    };
+
+    let targetProgress = 0;
+    let currentProgress = 0;
+    let raf: number | null = null;
+    let initialized = false;
+
+    const measureProgress = () => {
+      const rect = runway.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const scrollable = Math.max(1, rect.height - vh);
+      // Start rising Card 0 right as the section locks near the top
+      targetProgress = clamp((-rect.top + vh * 0.18) / (scrollable + vh * 0.12), 0, 1);
+      if (!initialized) {
+        currentProgress = targetProgress;
+        initialized = true;
+      }
+    };
+
+    const renderFrame = () => {
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+
+      // Silky exponential lerp toward target scroll progress so wheel ticks never jerk
+      const diff = targetProgress - currentProgress;
+      if (Math.abs(diff) > 0.0002) {
+        currentProgress += diff * 0.13;
+      } else {
+        currentProgress = targetProgress;
+      }
+
+      const progress = currentProgress;
+      const deckW = deck.clientWidth || Math.min(1360, vw - 48);
+      const firstCard = cardRefs.current[0];
+      const cardW = firstCard ? firstCard.offsetWidth : Math.min(360, vw * 0.26);
+      const count = items.length;
+
+      // Horizontal step between consecutive stacked cards
+      const maxSpan = Math.max(0, deckW - cardW);
+      const idealStep = cardW * 0.56;
+      const stepX = count > 1 ? Math.min(idealStep, maxSpan / (count - 1)) : 0;
+      const stepY = vw < 768 ? 14 : 8;
+
+      // All `count` cards (including Card 0!) rise from the bottom one after another
+      const stackProgress = clamp(progress / 0.9, 0, 1);
+      const overlap = 0.78;
+      const span = 1 / ((count - 1) * overlap + 1);
+      const startY = vh * 0.96;
+
+      // Precompute raw progress [0..1] for each card
+      const cardT: number[] = [];
+      for (let i = 0; i < count; i++) {
+        const segStart = i * (span * overlap);
+        cardT[i] = clamp((stackProgress - segStart) / span, 0, 1);
+      }
+
+      for (let i = 0; i < count; i++) {
+        const el = cardRefs.current[i];
+        if (!el) continue;
+
+        const rawT = cardT[i];
+        const bouncedT = easeOutBounceSpring(rawT);
+
+        const targetX = i * stepX;
+        const baseTargetY = i % 2 === 1 ? -stepY : stepY * 0.5;
+
+        // Subtle sympathetic bounce on this card right when the NEXT card (i + 1) lands on top of it
+        let impactBounceY = 0;
+        let impactScale = 1;
+        if (i + 1 < count) {
+          const nextT = cardT[i + 1];
+          if (nextT > 0.65 && nextT < 1) {
+            const pulse = Math.sin(((nextT - 0.65) / 0.35) * Math.PI);
+            impactBounceY = pulse * 7;
+            impactScale = 1 - pulse * 0.012;
+          }
+        }
+
+        const curY = startY * (1 - bouncedT) + baseTargetY * bouncedT + impactBounceY;
+        const baseTilt = CARD_TILTS[i % CARD_TILTS.length];
+        const entrySpin = (1 - bouncedT) * (i % 2 === 0 ? -5.5 : 5.5);
+        const curTilt = baseTilt + entrySpin;
+
+        el.style.transform = `translate3d(${targetX.toFixed(1)}px, ${curY.toFixed(1)}px, 0) rotate(${curTilt.toFixed(2)}deg) scale(${impactScale.toFixed(4)})`;
+        el.style.zIndex = String(10 + i);
+      }
+
+      if (bgTextRef.current) {
+        bgTextRef.current.style.transform = `translate3d(${(-progress * 36).toFixed(1)}px, 0, 0)`;
+      }
+
+      if (Math.abs(targetProgress - currentProgress) > 0.0002) {
+        raf = requestAnimationFrame(renderFrame);
+      } else {
+        raf = null;
+      }
+    };
+
+    const onScroll = () => {
+      measureProgress();
+      if (!raf) {
+        raf = requestAnimationFrame(renderFrame);
+      }
+    };
+
+    measureProgress();
+    renderFrame();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [items.length]);
+
+  if (!items.length) return null;
 
   return (
     <section
       id="capabilities-grid"
+      ref={runwayRef}
       data-reveal="1"
-      data-depth="1"
+      data-cap-parallax="1"
       data-screen-label="Capabilities"
       data-nav-tone="dark"
       style={{
         position: "relative",
-        background: INK,
+        zIndex: 1,
+        // Tall scroll runway so each of the 5 cards stacks one-by-one as you scroll
+        height: `${Math.max(280, items.length * 68)}vh`,
+        background: "#02AA7A",
         color: CREAM,
-        padding: "clamp(70px,12vh,150px) clamp(18px,3.6vw,60px)",
-        overflow: "hidden",
       }}
     >
-      <div data-depth-inner="1" style={{ maxWidth: 1280, margin: "0 auto" }}>
-        {/* Columns are sized `auto` and pushed apart with space-between, so
-            the right column hugs the container's right edge instead of
-            starting at the halfway line — with two equal fractions the
-            standfirst began mid-canvas and left a gutter of dead space
-            beside it. */}
+      {/* Sticky viewport stage holding the background headline and the stacking card deck */}
+      <div
+        style={{
+          position: "sticky",
+          top: 0,
+          height: "100svh",
+          width: "100%",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          padding: "clamp(40px, 6vh, 80px) clamp(18px, 3.6vw, 60px)",
+        }}
+      >
         <div
-          className="ab-grid-split ab-cap-head"
+          data-cap-inner="1"
           style={{
-            display: "grid",
-            gridTemplateColumns: "auto auto",
-            justifyContent: "space-between",
-            gap: "clamp(28px,4vw,64px)",
-            alignItems: "end",
-            paddingBottom: "clamp(32px,5vh,56px)",
-            borderBottom: `1px solid ${RULE}`,
+            position: "relative",
+            maxWidth: 1440,
+            width: "100%",
+            margin: "0 auto",
+            height: "clamp(460px, 68vh, 620px)",
+            display: "flex",
+            alignItems: "center",
+            willChange: "transform, filter",
           }}
         >
-          {/* One word, in the same system every other section heading uses:
-              displayFont at 700 with the site's tight tracking, wrapped in
-              SectionHeading so the brand accent falls the same way it does on
-              "Rating and reviews, in their words" and "Asked often". This was
-              briefly set in Instrument Serif at 132px, which made the two
-              capability sections the only headings on the page in a different
-              family and weight to everything around them. */}
-          <h2
+          {/* Giant background typography sitting behind the cards (visible on the right until covered) */}
+          <div
+            ref={bgTextRef}
             style={{
-              fontFamily: displayFont,
-              fontWeight: 700,
-              fontSize: "clamp(44px,7vw,104px)",
-              lineHeight: 0.94,
-              letterSpacing: "-.04em",
-              margin: 0,
-            }}
-          >
-            {/* Two words, not one: SectionHeading keeps at least one word in
-                ink so the two-tone accent always survives, which means a
-                bare "Capabilities" would render with no accent at all. */}
-            <span data-rv="line">
-              <span>
-                <SectionHeading tone="dark" accent={1}>
-                  Our capabilities
-                </SectionHeading>
-              </span>
-            </span>
-          </h2>
-
-          <p
-            data-rv="up"
-            style={{
-              ["--rv-i" as string]: 2,
-              margin: "0 0 10px",
-              /* Body sans at the site's standfirst size, matching FaqV2 and
-                 TestimonialsV2 — these were briefly set in Instrument Serif,
-                 which made them the only standfirsts on the page not in the
-                 body face. */
-              fontSize: "clamp(14px,1.15vw,17px)",
-              lineHeight: 1.6,
-              color: dim(0.62),
-              maxWidth: "26ch",
+              position: "absolute",
+              right: 0,
+              top: "50%",
+              transform: "translate3d(0, 0, 0)",
+              translate: "0 -50%",
               textAlign: "right",
-              justifySelf: "end",
+              pointerEvents: "none",
+              zIndex: 1,
+              maxWidth: "min(680px, 90vw)",
+              paddingRight: "clamp(8px, 2vw, 32px)",
             }}
           >
-            Four disciplines, one team — from first sketch through launch, and sharp long after.
-          </p>
-        </div>
-
-        <div className="ab-bento" style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 20, marginTop: 20 }}>
-          <div data-rv="up" style={{ gridColumn: "span 4" }}>
-            <Tile item={at(0)} height="clamp(320px,42vw,520px)" size="lg" />
+            <h2
+              style={{
+                fontFamily: displayFont,
+                fontWeight: 700,
+                fontSize: "clamp(48px, 7.6vw, 118px)",
+                lineHeight: 0.92,
+                letterSpacing: "-.045em",
+                margin: "0 0 24px",
+                color: "#FFFFFF",
+              }}
+            >
+              <SectionHeading tone="dark" accent={1}>
+                Our services
+              </SectionHeading>
+            </h2>
+            <p
+              style={{
+                margin: "0 0 0 auto",
+                fontSize: "clamp(15px, 1.2vw, 18px)",
+                fontWeight: 600,
+                lineHeight: 1.6,
+                color: "rgba(255, 255, 255, 0.92)",
+                maxWidth: "32ch",
+              }}
+            >
+              Five disciplines, one team — from first sketch through launch, and sharp long after.
+            </p>
           </div>
 
-          <div data-rv="up" style={{ ["--rv-i" as string]: 1, gridColumn: "span 2", display: "flex", flexDirection: "column", gap: 20 }}>
-            <Tile item={at(1)} height="clamp(150px,20vw,250px)" />
-            <Tile item={at(2)} height="clamp(150px,20vw,250px)" />
-          </div>
-
-          <div data-rv="up" style={{ ["--rv-i" as string]: 2, gridColumn: "span 6" }}>
-            <Tile item={at(3)} height="clamp(240px,26vw,340px)" />
+          {/* Card Stack Stage: Cards stack from left to right as you scroll */}
+          <div
+            ref={deckRef}
+            style={{
+              position: "relative",
+              zIndex: 5,
+              width: "100%",
+              height: "clamp(380px, 56vh, 510px)",
+            }}
+          >
+            {items.map((item, i) => (
+              <StackCard
+                key={item.key}
+                item={item}
+                index={i}
+                cardRef={(el) => {
+                  cardRefs.current[i] = el;
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>

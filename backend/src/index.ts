@@ -40,9 +40,104 @@ const poolConfig = {
 const pool = new pg.Pool(poolConfig);
 const db = drizzle({ client: pool });
 
-// Automatically ensure schema columns exist
+// Automatically ensure schema tables and columns exist
 async function initDbSchema() {
   try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS hero (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        location VARCHAR(255) NOT NULL DEFAULT '',
+        headline_line1 VARCHAR(255) NOT NULL DEFAULT '',
+        headline_line2 VARCHAR(255) NOT NULL DEFAULT '[]',
+        headline_line3 VARCHAR(255) NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS position (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        statement TEXT NOT NULL DEFAULT '',
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS capabilities (
+        id VARCHAR(50) PRIMARY KEY,
+        slot_id VARCHAR(10) NOT NULL DEFAULT '',
+        label VARCHAR(255) NOT NULL DEFAULT '',
+        title VARCHAR(255) NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        image_url TEXT NOT NULL DEFAULT '',
+        tag VARCHAR(255) NOT NULL DEFAULT '',
+        badge VARCHAR(255) NOT NULL DEFAULT '',
+        is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS projects (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL DEFAULT '',
+        subtitle VARCHAR(255) NOT NULL DEFAULT '',
+        service_type VARCHAR(255) NOT NULL DEFAULT '',
+        start_date VARCHAR(100) NOT NULL DEFAULT '',
+        end_date VARCHAR(100) NOT NULL DEFAULT '',
+        client VARCHAR(255) NOT NULL DEFAULT '',
+        client_type VARCHAR(50) NOT NULL DEFAULT 'brand',
+        ratio VARCHAR(20) NOT NULL DEFAULT '16:10',
+        category VARCHAR(255) NOT NULL DEFAULT 'Web Dev',
+        logo_url TEXT NOT NULL DEFAULT '',
+        thumbnail_url TEXT NOT NULL DEFAULT '',
+        video_thumbnail_url TEXT NOT NULL DEFAULT '',
+        is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE,
+        body_sections TEXT NOT NULL DEFAULT '[]',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS faqs_metadata (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        badge VARCHAR(255) NOT NULL DEFAULT 'GOT QUESTIONS?',
+        title VARCHAR(255) NOT NULL DEFAULT 'FREQUENTLY ASKED QUESTIONS',
+        description TEXT NOT NULL DEFAULT '',
+        button_text VARCHAR(255) NOT NULL DEFAULT 'VIEW ALL FAQS +',
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS faqs_items (
+        id SERIAL PRIMARY KEY,
+        question TEXT NOT NULL DEFAULT '',
+        answer TEXT NOT NULL DEFAULT '',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS process_steps (
+        id SERIAL PRIMARY KEY,
+        step_id VARCHAR(10) NOT NULL DEFAULT '',
+        title VARCHAR(255) NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS people_metadata (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        extra_count INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS team_members (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL DEFAULT '',
+        role VARCHAR(255) NOT NULL DEFAULT '',
+        description TEXT NOT NULL DEFAULT '',
+        avatar_url TEXT NOT NULL DEFAULT '',
+        original_avatar_url TEXT NOT NULL DEFAULT '',
+        socials TEXT NOT NULL DEFAULT '[]',
+        is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE,
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS logos (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL DEFAULT '',
+        image_url TEXT NOT NULL DEFAULT '',
+        sort_order INTEGER NOT NULL DEFAULT 0,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+
     await pool.query('ALTER TABLE capabilities ADD COLUMN IF NOT EXISTS image_url TEXT NOT NULL DEFAULT \'\';');
     await pool.query('ALTER TABLE capabilities ADD COLUMN IF NOT EXISTS is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE;');
     await pool.query('ALTER TABLE projects ADD COLUMN IF NOT EXISTS is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE;');
@@ -52,7 +147,7 @@ async function initDbSchema() {
     await pool.query('ALTER TABLE team_members ADD COLUMN IF NOT EXISTS socials TEXT NOT NULL DEFAULT \'[]\';');
     await pool.query('ALTER TABLE team_members ADD COLUMN IF NOT EXISTS is_bookmarked BOOLEAN NOT NULL DEFAULT FALSE;');
 
-    // Ensure new dynamic tables exist
+    // Ensure dynamic tables exist
     await pool.query(`
       CREATE TABLE IF NOT EXISTS company_stats (
         id SERIAL PRIMARY KEY,
@@ -97,11 +192,11 @@ async function initDbSchema() {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS contact_info (
         id INTEGER PRIMARY KEY DEFAULT 1,
-        headline_line1 VARCHAR(255) NOT NULL DEFAULT 'Let''s make',
-        headline_line2 VARCHAR(255) NOT NULL DEFAULT 'the thing.',
+        headline_line1 VARCHAR(255) NOT NULL DEFAULT 'Let''s Build Something',
+        headline_line2 VARCHAR(255) NOT NULL DEFAULT 'Extraordinary.',
         description TEXT NOT NULL DEFAULT '',
-        email VARCHAR(255) NOT NULL DEFAULT 'abstraktcreation@gmail.com',
-        phone VARCHAR(255) NOT NULL DEFAULT '+977 9823901866',
+        email VARCHAR(255) NOT NULL DEFAULT 'hello@ditsanddots.com',
+        phone VARCHAR(255) NOT NULL DEFAULT '+1 (817) 330-9194',
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
     `);
@@ -118,7 +213,7 @@ async function initDbSchema() {
     // Ensure default row for contact_info
     await pool.query(`
       INSERT INTO contact_info (id, headline_line1, headline_line2, description, email, phone)
-      VALUES (1, 'Let''s make', 'the thing.', 'Tell us what you are trying to launch and roughly when. You will get a scope and a number, not a deck.', 'abstraktcreation@gmail.com', '+977 9823901866')
+      VALUES (1, 'Let''s Build Something', 'Extraordinary.', 'Ready to elevate your digital presence? Reach out to us today and let''s discuss how we can help your business grow.', 'hello@ditsanddots.com', '+1 (817) 330-9194')
       ON CONFLICT (id) DO NOTHING;
     `);
 
@@ -127,22 +222,20 @@ async function initDbSchema() {
     if (parseInt(skillsRes.rows[0].count, 10) === 0) {
       await pool.query(`
         INSERT INTO contact_skills (label, accent, sort_order) VALUES
-        ('React', true, 0),
-        ('Next.js', false, 1),
-        ('Web Solutions', true, 2),
-        ('API Integration', true, 3),
-        ('Dashboards', false, 4),
-        ('3D & Animation', false, 5),
-        ('Social Media', true, 6),
-        ('Music Production', true, 7),
-        ('Video Production', false, 8),
-        ('Graphic Design', true, 9),
+        ('Web Development', true, 0),
+        ('AI-Driven Apps', false, 1),
+        ('Digital Marketing', true, 2),
+        ('Graphic Designing', true, 3),
+        ('Video Editing', false, 4),
+        ('React', false, 5),
+        ('Next.js', true, 6),
+        ('Full-Stack', true, 7),
+        ('Cloud & Automation', false, 8),
+        ('SEO & Growth', true, 9),
         ('UI/UX Design', true, 10),
-        ('System Architecture', false, 11),
-        ('Digital Marketing', false, 12),
-        ('Creative', false, 13),
-        ('Motion Design', true, 14),
-        ('Brand Systems', false, 15);
+        ('POS Systems', false, 11),
+        ('Machine Learning', false, 12),
+        ('Brand Systems', true, 13);
       `);
     }
 
@@ -158,10 +251,10 @@ async function initDbSchema() {
     if (parseInt(statsRes.rows[0].count, 10) === 0) {
       await pool.query(`
         INSERT INTO company_stats (value, suffix, display, label, sort_order) VALUES
-        (30, '+', '', 'Projects Delivered', 0),
-        (15, '+', '', 'Clients Worked With', 1),
-        (6, '+', '', 'Creative Capabilities', 2),
-        (0, '', '∞', 'Ideas Turned Real', 3);
+        (99, '%', '', 'Project Success', 0),
+        (92, '%', '', 'Client Retention', 1),
+        (0, '', '99.9%', 'Uptime Guarantee', 2),
+        (45, '%', '', 'ROI Increase', 3);
       `);
     }
 
@@ -170,21 +263,10 @@ async function initDbSchema() {
     if (parseInt(testRes.rows[0].count, 10) === 0) {
       await pool.query(`
         INSERT INTO testimonials (quote, author_name, author_role, theme, sort_order) VALUES
-        ('They rebuilt the site and the brand in the same pass, so nothing felt bolted on. First month after launch, enquiries doubled.', 'Kiran Gurung', 'Founder, Vertex', 'light', 0),
-        ('The build is stable and the handover was clean. Our own team picked it up in a week without a single call.', 'Sushma Bhandari', 'Product Lead, Kinetic', 'light', 1),
-        ('We came for a video and left with a whole system: identity, site, launch campaign. One team, one invoice, one standard.', 'Daniel Reyes', 'CMO, Apex', 'light', 2),
-        ('Timelines held. That is rarer than it should be, and it is why we are on the third project with them.', 'Priya Adhikari', 'Director, Spectrum', 'dark', 3);
-      `);
-    }
-
-    // Ensure default careers_roles if empty
-    const rolesRes = await pool.query('SELECT COUNT(*) FROM careers_roles;');
-    if (parseInt(rolesRes.rows[0].count, 10) === 0) {
-      await pool.query(`
-        INSERT INTO careers_roles (title, location, type, sort_order) VALUES
-        ('Frontend Engineer', 'Lalitpur', 'Full-time', 0),
-        ('Motion Designer', 'Hybrid', 'Full-time', 1),
-        ('Growth Strategist', 'Dallas', 'Contract', 2);
+        ('Dits and Dots serves as our extended engineering team — their seamless integration and dedicated support helped us launch on schedule.', 'NCSC Team', 'Public App & POS System', 'light', 0),
+        ('Their data-driven SEO and digital marketing strategy amplified our brand presence and delivered measurable ROI across every channel.', 'Noor Leadership', 'Digital Marketing Partner', 'light', 1),
+        ('From cloud automation to UI/UX, they don''t just deliver code — they build comprehensive digital ecosystems that evolve with our business.', 'Byterack Aerolutiom Inc', 'Automation & Cloud', 'light', 2),
+        ('Combining AI-driven workflows with sharp product design, the Nexus AI Platform launch exceeded every performance benchmark.', 'Nexus AI', 'AI Platform & UI/UX', 'dark', 3);
       `);
     }
 
@@ -193,7 +275,6 @@ async function initDbSchema() {
     console.error("Database schema init warning:", err);
   }
 }
-initDbSchema();
 
 app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
@@ -204,10 +285,6 @@ app.use(express.json({ limit: '10mb' }));
 
 // Seeding function
 async function seedDatabase() {
-  if (process.env.SKIP_SEED === 'true') {
-    console.log("Database seeding skipped via SKIP_SEED environment variable.");
-    return;
-  }
   console.log("Checking database content...");
   try {
     try {
@@ -215,17 +292,32 @@ async function seedDatabase() {
     } catch (e) {
       console.log("Column migration check:", e);
     }
-    // 1. Seed Hero
-    const heroCount = await db.select().from(hero);
+    // 1. Seed Hero (and auto-migrate if DB still holds the old Abstrakt default seed)
+    let heroCount = await db.select().from(hero);
+    if (heroCount.length > 0 && (heroCount[0].headlineLine1 === "DESIGN." || heroCount[0].location?.includes("SANEPA"))) {
+      console.log("Migrating old Abstrakt default seed to Dits and Dots seed...");
+      await db.delete(hero);
+      await db.delete(position);
+      await db.delete(capabilities);
+      await db.delete(projects);
+      await db.delete(faqsMetadata);
+      await db.delete(faqsItems);
+      await db.delete(logos);
+      await db.delete(companyStats);
+      await db.delete(testimonials);
+      await db.delete(contactInfo);
+      await db.delete(contactSkills);
+      heroCount = [];
+    }
     if (heroCount.length === 0) {
       console.log("Seeding default Hero content...");
       await db.insert(hero).values({
         id: 1,
-        location: "SANEPA, NEPAL — DALLAS, TX",
-        headlineLine1: "DESIGN.",
-        headlineLine2: JSON.stringify(["BUILD.", "GROW."]),
+        location: "THE COLONY, TX",
+        headlineLine1: "Engineering Digital Excellence.",
+        headlineLine2: JSON.stringify(["DESIGN.", "BUILD.", "GROW."]),
         headlineLine3: "",
-        description: "From web solutions and digital marketing to video, music, 3D and graphic design."
+        description: "Your end-to-end partner for Web Development, AI Solutions, and Creative Media. We build the future, one dot at a time."
       });
     }
 
@@ -235,7 +327,7 @@ async function seedDatabase() {
       console.log("Seeding default Position content...");
       await db.insert(position).values({
         id: 1,
-        statement: "We build the digital side of a business and the creative work that surrounds it — the site, the identity, the campaign and the content, from one team."
+        statement: "In the fast-paced digital landscape, reliability is the ultimate currency. Dits and Dots serves as your extended team, providing seamless integration and dedicated support for your most ambitious projects."
       });
     }
 
@@ -245,47 +337,58 @@ async function seedDatabase() {
       console.log("Seeding default Capabilities...");
       const defaultPillars = [
         {
-          id: "digital",
+          id: "web",
           slotId: "01",
-          label: "LEADING",
-          title: "DIGITAL",
-          description: "Web solutions — high-performance engineering and UI/UX systems, in the studio's own words.",
+          label: "ENGINEERING",
+          title: "WEB DEVELOPMENT",
+          description: "High-performance, scalable web applications built with modern frameworks and cutting-edge tech.",
           imageUrl: "",
-          tag: "Web Solutions",
-          badge: "LEAD PILLAR — SWAPPABLE SLOT",
+          tag: "Web Development, Full-Stack",
+          badge: "WEB DEVELOPMENT",
           isBookmarked: false
         },
         {
-          id: "identity",
+          id: "marketing",
           slotId: "02",
-          label: "SHAPING",
-          title: "IDENTITY",
-          description: "Brand architecture — premium corporate design systems, bespoke typography, and art direction.",
+          label: "GROWTH",
+          title: "DIGITAL MARKETING",
+          description: "Data-driven strategies to amplify your brand presence and drive measurable growth across all channels.",
           imageUrl: "",
-          tag: "Brand Architecture",
-          badge: "BRAND SYSTEM — SWAPPABLE SLOT",
+          tag: "SEO, Performance Marketing",
+          badge: "DIGITAL MARKETING",
           isBookmarked: false
         },
         {
-          id: "campaign",
+          id: "ai",
           slotId: "03",
-          label: "ENGAGING",
-          title: "CAMPAIGN",
-          description: "Creative storytelling — digital marketing, conversion funnel optimization, and content strategies.",
+          label: "INTELLIGENCE",
+          title: "AI-DRIVEN APPS",
+          description: "Intelligent solutions leveraging machine learning to automate processes and enhance user experiences.",
           imageUrl: "",
-          tag: "Campaign Launch",
-          badge: "MARKETING — SWAPPABLE SLOT",
+          tag: "AI Solutions, Machine Learning",
+          badge: "AI-DRIVEN APPS",
           isBookmarked: false
         },
         {
-          id: "creative",
+          id: "design",
           slotId: "04",
-          label: "EXPRESSING",
-          title: "CREATIVE",
-          description: "Multimedia assets — 3D modeling, premium video production, sound design, and motion graphics.",
+          label: "DESIGN",
+          title: "GRAPHIC DESIGNING",
+          description: "Visual storytelling that resonates. From branding to UI/UX, we design for impact and clarity.",
           imageUrl: "",
-          tag: "Motion & 3D",
-          badge: "CREATIVE — SWAPPABLE SLOT",
+          tag: "Branding, UI/UX Design",
+          badge: "GRAPHIC DESIGNING",
+          isBookmarked: false
+        },
+        {
+          id: "video",
+          slotId: "05",
+          label: "MEDIA",
+          title: "VIDEO EDITING",
+          description: "Cinematic video production and editing that captures attention and tells your story beautifully.",
+          imageUrl: "",
+          tag: "Video Production, Motion",
+          badge: "VIDEO EDITING",
           isBookmarked: false
         }
       ];
@@ -300,11 +403,12 @@ async function seedDatabase() {
     if (projectsCount.length === 0) {
       console.log("Seeding default Projects...");
       const defaultProjects = [
-        { title: "COSMOS AUDIO", subtitle: "3D soundscapes & motion scoring", ratio: "3:4", category: "CREATIVE", sortOrder: 0 },
-        { title: "VERTEX PORTAL", subtitle: "Web3 finance interface & systems", ratio: "2:3", category: "DIGITAL", sortOrder: 1 },
-        { title: "KINETIC ENGINE", subtitle: "Conversion growth systems", ratio: "4:3", category: "GROWTH", sortOrder: 2 },
-        { title: "APEX IDENTITY", subtitle: "Corporate brand guidelines", ratio: "16:10", category: "DESIGN", sortOrder: 3 },
-        { title: "NEXUS MOBILE", subtitle: "Cross-platform core application", ratio: "2:3", category: "DIGITAL", sortOrder: 4 }
+        { title: "NCSC Public App", subtitle: "React • Frontend", client: "NCSC", ratio: "16:10", category: "Web Dev", thumbnailUrl: "/images/work/ncsc_frontend.png", isBookmarked: true, sortOrder: 0 },
+        { title: "Noor Digital Marketing", subtitle: "SEO • Marketing", client: "Noor", ratio: "16:10", category: "Marketing", thumbnailUrl: "/images/work/noor.jpg", isBookmarked: true, sortOrder: 1 },
+        { title: "Byterack Aerolutiom Inc", subtitle: "Automation • Cloud", client: "Byterack", ratio: "16:10", category: "Software Dev", thumbnailUrl: "/images/work/byterack.png", isBookmarked: false, sortOrder: 2 },
+        { title: "Nexus AI Platform", subtitle: "AI App • UI/UX", client: "Nexus AI", ratio: "16:10", category: "AI App", thumbnailUrl: "/images/work/nexusai.png", isBookmarked: false, sortOrder: 3 },
+        { title: "NCSC POS System", subtitle: "POS • Full-Stack", client: "NCSC", ratio: "16:10", category: "Software Dev", thumbnailUrl: "https://picsum.photos/seed/ncfc-posh/800/600", isBookmarked: false, sortOrder: 4 },
+        { title: "Commscope Architect Design", subtitle: "Architecture • UI/UX", client: "Commscope", ratio: "16:10", category: "Design", thumbnailUrl: "https://picsum.photos/seed/cummscope/800/600", isBookmarked: false, sortOrder: 5 }
       ];
       for (const p of defaultProjects) {
         await db.insert(projects).values(p);
@@ -319,7 +423,7 @@ async function seedDatabase() {
         id: 1,
         badge: "GOT QUESTIONS?",
         title: "FREQUENTLY ASKED QUESTIONS",
-        description: "Find answers to the most common questions about Abstrakt Creation and our comprehensive digital, creative, and branding services.",
+        description: "Find answers to the most common questions about Dits and Dots Agency and our web, AI, marketing, and creative media services.",
         buttonText: "VIEW ALL FAQS +"
       });
     }
@@ -330,23 +434,23 @@ async function seedDatabase() {
       console.log("Seeding default FAQ items...");
       const defaultQuestions = [
         {
-          question: "What services does Abstrakt Creation offer?",
-          answer: "We provide end-to-end design, digital, growth, and creative solutions. This includes web application development, UI/UX systems, brand identity guidelines, marketing campaigns, 3D animations, video production, and sound design.",
+          question: "What does Dits and Dots actually do?",
+          answer: "We are an end-to-end partner for Web Development, AI-Driven Apps, Digital Marketing, Graphic Designing, and Video Editing — building complete digital ecosystems.",
           sortOrder: 0
         },
         {
-          question: "How long does a typical project take?",
-          answer: "Timelines vary depending on scope. A standard brand design or website development project usually takes between 4 to 8 weeks. Larger campaigns or complex Web3 platforms can take 12 weeks or more. We establish clear phases during planning.",
+          question: "How does your B2B partnership model work?",
+          answer: "Dits and Dots serves as your extended team, providing seamless integration, dedicated teams, and long-term reliability so your technology stack stays ahead of the curve.",
           sortOrder: 1
         },
         {
-          question: "Do you work with international clients?",
-          answer: "Yes, we work globally. We are physically situated in Lalitpur, Nepal and Dallas, Texas, allowing us to collaborate seamlessly with clients across the US, Europe, and South Asia.",
+          question: "Where are you located and do you work globally?",
+          answer: "We are based at 3620 Adelaide, The Colony, TX 75056, and partner with global brands across time zones.",
           sortOrder: 2
         },
         {
-          question: "What is your pricing structure?",
-          answer: "We operate on flat project-based pricing or ongoing monthly retainers depending on what fits your workflow. Every project starts with a detailed scoping phase where we provide a transparent, all-inclusive budget before starting.",
+          question: "How do we start a project?",
+          answer: "Reach out via email at hello@ditsanddots.com or call +1 (817) 330-9194 to discuss your goals and scope.",
           sortOrder: 3
         }
       ];
@@ -355,110 +459,67 @@ async function seedDatabase() {
       }
     }
 
-    // 7. Seed Process Steps
-    const processStepsCount = await db.select().from(processSteps);
-    if (processStepsCount.length === 0) {
-      console.log("Seeding default Process steps...");
-      const defaultSteps = [
-        { stepId: "01", title: "Brief", description: "A call, a scope, a number. No proposal theatre.", sortOrder: 0 },
-        { stepId: "02", title: "Plan", description: "Structure, references and a budget you sign off.", sortOrder: 1 },
-        { stepId: "03", title: "Make", description: "Design, build, shoot, edit. One team, in house.", sortOrder: 2 },
-        { stepId: "04", title: "Launch", description: "Ship it, measure it, keep it running.", sortOrder: 3 }
-      ];
-      for (const step of defaultSteps) {
-        await db.insert(processSteps).values(step);
-      }
-    }
-
-    // 8. Seed People Metadata
-    const peopleMetaCount = await db.select().from(peopleMetadata);
-    if (peopleMetaCount.length === 0) {
-      console.log("Seeding default People Metadata...");
-      await db.insert(peopleMetadata).values({
-        id: 1,
-        extraCount: 6
-      });
-    }
-
-    // 9. Seed Team Members
-    const teamCount = await db.select().from(teamMembers);
-    if (teamCount.length === 0) {
-      console.log("Seeding default Team members...");
-      const defaultTeam = [
-        { name: "Aabhiskar KC", role: "CEO", sortOrder: 0 },
-        { name: "Yashmine Gurung", role: "Creative Lead", sortOrder: 1 },
-        { name: "Nisika Shrestha", role: "HR", sortOrder: 2 },
-        { name: "Nikhil Tuladhar", role: "IT", sortOrder: 3 }
-      ];
-      for (const member of defaultTeam) {
-        await db.insert(teamMembers).values(member);
-      }
-    }
-
-    // 10. Seed Logos
+    // 7. Seed Logos
     const logosCount = await db.select().from(logos);
     if (logosCount.length === 0) {
       console.log("Seeding default Logos...");
       const defaultLogos = [
-        { name: "VERTEX", imageUrl: "", sortOrder: 0 },
-        { name: "KINETIC", imageUrl: "", sortOrder: 1 },
-        { name: "APEX", imageUrl: "", sortOrder: 2 },
-        { name: "SPECTRUM", imageUrl: "", sortOrder: 3 },
-        { name: "COSMOS", imageUrl: "", sortOrder: 4 },
-        { name: "QUANTUM", imageUrl: "", sortOrder: 5 },
-        { name: "NEXUS", imageUrl: "", sortOrder: 6 },
-        { name: "ELEVATE", imageUrl: "", sortOrder: 7 }
+        { name: "NCSC", imageUrl: "", sortOrder: 0 },
+        { name: "NOOR", imageUrl: "", sortOrder: 1 },
+        { name: "COMMSCOPE", imageUrl: "", sortOrder: 2 },
+        { name: "BYTERACK", imageUrl: "", sortOrder: 3 },
+        { name: "NEXUS AI", imageUrl: "", sortOrder: 4 }
       ];
       for (const logo of defaultLogos) {
         await db.insert(logos).values(logo);
       }
     }
 
-    // 11. Seed Stats
+    // 8. Seed Stats
     const statsCount = await db.select().from(companyStats);
     if (statsCount.length === 0) {
       console.log("Seeding default Company Stats...");
       const defaultStats = [
-        { value: 30, suffix: "+", display: "", label: "Projects Delivered", sortOrder: 0 },
-        { value: 15, suffix: "+", display: "", label: "Clients Worked With", sortOrder: 1 },
-        { value: 6, suffix: "+", display: "", label: "Creative Capabilities", sortOrder: 2 },
-        { value: 0, suffix: "", display: "∞", label: "Ideas Turned Real", sortOrder: 3 },
+        { value: 99, suffix: "%", display: "", label: "Project Success", sortOrder: 0 },
+        { value: 92, suffix: "%", display: "", label: "Client Retention", sortOrder: 1 },
+        { value: 0, suffix: "", display: "99.9%", label: "Uptime Guarantee", sortOrder: 2 },
+        { value: 45, suffix: "%", display: "", label: "ROI Increase", sortOrder: 3 },
       ];
       for (const s of defaultStats) {
         await db.insert(companyStats).values(s);
       }
     }
 
-    // 12. Seed Testimonials
+    // 9. Seed Testimonials
     const testimonialsCount = await db.select().from(testimonials);
     if (testimonialsCount.length === 0) {
       console.log("Seeding default Testimonials...");
       const defaultTestimonials = [
         {
-          quote: "They rebuilt the site and the brand in the same pass, so nothing felt bolted on. First month after launch, enquiries doubled.",
-          authorName: "Kiran Gurung",
-          authorRole: "Founder, Vertex",
+          quote: "Dits and Dots serves as our extended engineering team — their seamless integration and dedicated support helped us launch on schedule.",
+          authorName: "NCSC Team",
+          authorRole: "Public App & POS System",
           theme: "light",
           sortOrder: 0
         },
         {
-          quote: "The build is stable and the handover was clean. Our own team picked it up in a week without a single call.",
-          authorName: "Sushma Bhandari",
-          authorRole: "Product Lead, Kinetic",
+          quote: "Their data-driven SEO and digital marketing strategy amplified our brand presence and delivered measurable ROI across every channel.",
+          authorName: "Noor Leadership",
+          authorRole: "Digital Marketing Partner",
           theme: "light",
           sortOrder: 1
         },
         {
-          quote: "We came for a video and left with a whole system: identity, site, launch campaign. One team, one invoice, one standard.",
-          authorName: "Daniel Reyes",
-          authorRole: "CMO, Apex",
+          quote: "From cloud automation to UI/UX, they don't just deliver code — they build comprehensive digital ecosystems that evolve with our business.",
+          authorName: "Byterack Aerolutiom Inc",
+          authorRole: "Automation & Cloud",
           theme: "light",
           sortOrder: 2
         },
         {
-          quote: "Timelines held. That is rarer than it should be, and it is why we are on the third project with them.",
-          authorName: "Priya Adhikari",
-          authorRole: "Director, Spectrum",
+          quote: "Combining AI-driven workflows with sharp product design, the Nexus AI Platform launch exceeded every performance benchmark.",
+          authorName: "Nexus AI",
+          authorRole: "AI Platform & UI/UX",
           theme: "dark",
           sortOrder: 3
         }
@@ -468,67 +529,39 @@ async function seedDatabase() {
       }
     }
 
-    // 13. Seed Careers Metadata
-    const careersMetaCount = await db.select().from(careersMetadata);
-    if (careersMetaCount.length === 0) {
-      console.log("Seeding default Careers metadata...");
-      await db.insert(careersMetadata).values({
-        id: 1,
-        badge: "CAREERS",
-        title: "We are hiring",
-        description: "Send the project you are proudest of. If it is good we will find a seat for you, listed role or not."
-      });
-    }
-
-    // 14. Seed Careers Roles
-    const careersRolesCount = await db.select().from(careersRoles);
-    if (careersRolesCount.length === 0) {
-      console.log("Seeding default Careers roles...");
-      const defaultRoles = [
-        { title: "Frontend Engineer", location: "Lalitpur", type: "Full-time", sortOrder: 0 },
-        { title: "Motion Designer", location: "Hybrid", type: "Full-time", sortOrder: 1 },
-        { title: "Growth Strategist", location: "Dallas", type: "Contract", sortOrder: 2 }
-      ];
-      for (const r of defaultRoles) {
-        await db.insert(careersRoles).values(r);
-      }
-    }
-
-    // 15. Seed Contact Info
+    // 10. Seed Contact Info
     const contactCount = await db.select().from(contactInfo);
     if (contactCount.length === 0) {
       console.log("Seeding default Contact info...");
       await db.insert(contactInfo).values({
         id: 1,
-        headlineLine1: "Let's make",
-        headlineLine2: "the thing.",
-        description: "Tell us what you are trying to launch and roughly when. You will get a scope and a number, not a deck.",
-        email: "abstraktcreation@gmail.com",
-        phone: "+977 9823901866"
+        headlineLine1: "Let's Build Something",
+        headlineLine2: "Extraordinary.",
+        description: "Ready to elevate your digital presence? Reach out to us today and let's discuss how we can help your business grow.",
+        email: "hello@ditsanddots.com",
+        phone: "+1 (817) 330-9194"
       });
     }
 
-    // 16. Seed Contact Skills / CTA Pills
+    // 11. Seed Contact Skills / CTA Pills
     const contactSkillsCount = await db.select().from(contactSkills);
     if (contactSkillsCount.length === 0) {
       console.log("Seeding default Contact Skills pills...");
       const defaultSkills = [
-        { label: "React", accent: true, sortOrder: 0 },
-        { label: "Next.js", accent: false, sortOrder: 1 },
-        { label: "Web Solutions", accent: true, sortOrder: 2 },
-        { label: "API Integration", accent: true, sortOrder: 3 },
-        { label: "Dashboards", accent: false, sortOrder: 4 },
-        { label: "3D & Animation", accent: false, sortOrder: 5 },
-        { label: "Social Media", accent: true, sortOrder: 6 },
-        { label: "Music Production", accent: true, sortOrder: 7 },
-        { label: "Video Production", accent: false, sortOrder: 8 },
-        { label: "Graphic Design", accent: true, sortOrder: 9 },
+        { label: "Web Development", accent: true, sortOrder: 0 },
+        { label: "AI-Driven Apps", accent: false, sortOrder: 1 },
+        { label: "Digital Marketing", accent: true, sortOrder: 2 },
+        { label: "Graphic Designing", accent: true, sortOrder: 3 },
+        { label: "Video Editing", accent: false, sortOrder: 4 },
+        { label: "React", accent: false, sortOrder: 5 },
+        { label: "Next.js", accent: true, sortOrder: 6 },
+        { label: "Full-Stack", accent: true, sortOrder: 7 },
+        { label: "Cloud & Automation", accent: false, sortOrder: 8 },
+        { label: "SEO & Growth", accent: true, sortOrder: 9 },
         { label: "UI/UX Design", accent: true, sortOrder: 10 },
-        { label: "System Architecture", accent: false, sortOrder: 11 },
-        { label: "Digital Marketing", accent: false, sortOrder: 12 },
-        { label: "Creative", accent: false, sortOrder: 13 },
-        { label: "Motion Design", accent: true, sortOrder: 14 },
-        { label: "Brand Systems", accent: false, sortOrder: 15 }
+        { label: "POS Systems", accent: false, sortOrder: 11 },
+        { label: "Machine Learning", accent: false, sortOrder: 12 },
+        { label: "Brand Systems", accent: true, sortOrder: 13 }
       ];
       for (const s of defaultSkills) {
         await db.insert(contactSkills).values(s);
@@ -545,55 +578,65 @@ let cachedContentData: any = null;
 
 const DEFAULT_FALLBACK_CONTENT = {
   hero: {
-    location: "SANEPA, NEPAL — DALLAS, TX",
-    headlineLine1: "DESIGN.",
-    subHeadlineLines: ["BUILD.", "GROW."],
-    headlineLines: ["DESIGN.", "BUILD.", "GROW."],
-    description: "From web solutions and digital marketing to video, music, 3D and graphic design."
+    location: "THE COLONY, TX",
+    headlineLine1: "Engineering Digital Excellence.",
+    subHeadlineLines: ["DESIGN.", "BUILD.", "GROW."],
+    headlineLines: ["Engineering Digital Excellence.", "DESIGN.", "BUILD.", "GROW."],
+    description: "Your end-to-end partner for Web Development, AI Solutions, and Creative Media. We build the future, one dot at a time."
   },
   position: {
-    statement: "We build the digital side of a business and the creative work that surrounds it — the site, the identity, the campaign and the content, from one team."
+    statement: "In the fast-paced digital landscape, reliability is the ultimate currency. Dits and Dots serves as your extended team, providing seamless integration and dedicated support for your most ambitious projects."
   },
   capabilities: {
     pillars: {
-      digital: {
+      web: {
         id: "01",
-        label: "LEADING",
-        title: "DIGITAL",
-        description: "Web solutions — high-performance engineering and UI/UX systems, in the studio's own words.",
+        label: "ENGINEERING",
+        title: "WEB DEVELOPMENT",
+        description: "High-performance, scalable web applications built with modern frameworks and cutting-edge tech.",
         imageUrl: "",
-        tag: "Web Solutions",
-        badge: "LEAD PILLAR — SWAPPABLE SLOT",
+        tag: "Web Development, Full-Stack",
+        badge: "WEB DEVELOPMENT",
         isBookmarked: false
       },
-      identity: {
+      marketing: {
         id: "02",
-        label: "SHAPING",
-        title: "IDENTITY",
-        description: "Brand architecture — premium corporate design systems, bespoke typography, and art direction.",
+        label: "GROWTH",
+        title: "DIGITAL MARKETING",
+        description: "Data-driven strategies to amplify your brand presence and drive measurable growth across all channels.",
         imageUrl: "",
-        tag: "Brand Architecture",
-        badge: "BRAND SYSTEM — SWAPPABLE SLOT",
+        tag: "SEO, Performance Marketing",
+        badge: "DIGITAL MARKETING",
         isBookmarked: false
       },
-      campaign: {
+      ai: {
         id: "03",
-        label: "ENGAGING",
-        title: "CAMPAIGN",
-        description: "Creative storytelling — digital marketing, conversion funnel optimization, and content strategies.",
+        label: "INTELLIGENCE",
+        title: "AI-DRIVEN APPS",
+        description: "Intelligent solutions leveraging machine learning to automate processes and enhance user experiences.",
         imageUrl: "",
-        tag: "Campaign Launch",
-        badge: "MARKETING — SWAPPABLE SLOT",
+        tag: "AI Solutions, Machine Learning",
+        badge: "AI-DRIVEN APPS",
         isBookmarked: false
       },
-      creative: {
+      design: {
         id: "04",
-        label: "EXPRESSING",
-        title: "CREATIVE",
-        description: "Multimedia assets — 3D modeling, premium video production, sound design, and motion graphics.",
+        label: "DESIGN",
+        title: "GRAPHIC DESIGNING",
+        description: "Visual storytelling that resonates. From branding to UI/UX, we design for impact and clarity.",
         imageUrl: "",
-        tag: "Motion & 3D",
-        badge: "CREATIVE — SWAPPABLE SLOT",
+        tag: "Branding, UI/UX Design",
+        badge: "GRAPHIC DESIGNING",
+        isBookmarked: false
+      },
+      video: {
+        id: "05",
+        label: "MEDIA",
+        title: "VIDEO EDITING",
+        description: "Cinematic video production and editing that captures attention and tells your story beautifully.",
+        imageUrl: "",
+        tag: "Video Production, Motion",
+        badge: "VIDEO EDITING",
         isBookmarked: false
       }
     }
@@ -602,85 +645,102 @@ const DEFAULT_FALLBACK_CONTENT = {
     projects: [
       {
         id: 1,
-        title: "Zuus x Shake Shaq",
-        subtitle: "Cold-pressed juice x milkshake collab campaign",
-        serviceType: "Campaign Launch",
+        title: "NCSC Public App",
+        subtitle: "React • Frontend",
+        serviceType: "Web Dev",
         startDate: "2024",
         endDate: "Present",
-        client: "Zuus",
+        client: "NCSC",
         clientType: "brand",
         ratio: "16:10",
-        category: "Campaign",
+        category: "Web Dev",
         logoUrl: "",
-        thumbnailUrl: "/images/zuus-shakeshaq-campaign.png",
+        thumbnailUrl: "/images/work/ncsc_frontend.png",
         videoThumbnailUrl: "",
         isBookmarked: true,
         bodySections: []
       },
       {
         id: 2,
-        title: "Serena Moon",
-        subtitle: "Private digital exhibition & membership site",
-        serviceType: "Web Solutions",
+        title: "Noor Digital Marketing",
+        subtitle: "SEO • Marketing",
+        serviceType: "Marketing",
         startDate: "2024",
         endDate: "Present",
-        client: "Serena Moon",
+        client: "Noor",
         clientType: "brand",
-        ratio: "2:3",
-        category: "Digital",
+        ratio: "16:10",
+        category: "Marketing",
         logoUrl: "",
-        thumbnailUrl: "/images/serena-moon-website.png",
+        thumbnailUrl: "/images/work/noor.jpg",
         videoThumbnailUrl: "",
         isBookmarked: true,
         bodySections: []
       },
       {
         id: 3,
-        title: "Arbitrary",
-        subtitle: "Music platform — records, events, artists",
-        serviceType: "Web & Music",
-        startDate: "2023",
-        endDate: "2024",
-        client: "Arbitrary",
+        title: "Byterack Aerolutiom Inc",
+        subtitle: "Automation • Cloud",
+        serviceType: "Software Dev",
+        startDate: "2024",
+        endDate: "Present",
+        client: "Byterack",
         clientType: "brand",
-        ratio: "4:3",
-        category: "Digital",
+        ratio: "16:10",
+        category: "Software Dev",
         logoUrl: "",
-        thumbnailUrl: "/images/arbitrary-website.png",
+        thumbnailUrl: "/images/work/byterack.png",
         videoThumbnailUrl: "",
         isBookmarked: false,
         bodySections: []
       },
       {
         id: 4,
-        title: "APEX IDENTITY",
-        subtitle: "Corporate brand guidelines",
-        serviceType: "Brand Architecture",
-        startDate: "2023",
-        endDate: "2024",
-        client: "Apex",
+        title: "Nexus AI Platform",
+        subtitle: "AI App • UI/UX",
+        serviceType: "AI App",
+        startDate: "2024",
+        endDate: "Present",
+        client: "Nexus AI",
         clientType: "brand",
         ratio: "16:10",
-        category: "Design",
+        category: "AI App",
         logoUrl: "",
-        thumbnailUrl: "/images/zuus-shakeshaq-campaign.png",
+        thumbnailUrl: "/images/work/nexusai.png",
         videoThumbnailUrl: "",
         isBookmarked: false,
         bodySections: []
       },
       {
         id: 5,
-        title: "COSMOS AUDIO",
-        subtitle: "3D soundscapes & motion scoring",
-        serviceType: "Creative & Audio",
+        title: "NCSC POS System",
+        subtitle: "POS • Full-Stack",
+        serviceType: "Software Dev",
         startDate: "2023",
-        endDate: "2023",
-        client: "Cosmos",
+        endDate: "2024",
+        client: "NCSC",
         clientType: "brand",
-        ratio: "3:4",
-        category: "Creative",
+        ratio: "16:10",
+        category: "Software Dev",
         logoUrl: "",
-        thumbnailUrl: "/images/serena-moon-website.png",
+        thumbnailUrl: "https://picsum.photos/seed/ncfc-posh/800/600",
+        videoThumbnailUrl: "",
+        isBookmarked: false,
+        bodySections: []
+      },
+      {
+        id: 6,
+        title: "Commscope Architect Design",
+        subtitle: "Architecture • UI/UX",
+        serviceType: "Design",
+        startDate: "2023",
+        endDate: "2024",
+        client: "Commscope",
+        clientType: "brand",
+        ratio: "16:10",
+        category: "Design",
+        logoUrl: "",
+        thumbnailUrl: "https://picsum.photos/seed/cummscope/800/600",
         videoThumbnailUrl: "",
         isBookmarked: false,
         bodySections: []
@@ -690,99 +750,70 @@ const DEFAULT_FALLBACK_CONTENT = {
   faq: {
     badge: "GOT QUESTIONS?",
     title: "FREQUENTLY ASKED QUESTIONS",
-    description: "Find answers to the most common questions about Abstrakt Creation and our comprehensive digital, creative, and branding services.",
+    description: "Find answers to the most common questions about Dits and Dots Agency and our web, AI, marketing, and creative media services.",
     buttonText: "VIEW ALL FAQS +",
     questions: [
       {
-        question: "What services does Abstrakt Creation offer?",
-        answer: "We provide end-to-end design, digital, growth, and creative solutions. This includes web application development, UI/UX systems, brand identity guidelines, marketing campaigns, 3D animations, video production, and sound design."
+        question: "What does Dits and Dots actually do?",
+        answer: "We are an end-to-end partner for Web Development, AI-Driven Apps, Digital Marketing, Graphic Designing, and Video Editing — building complete digital ecosystems."
       },
       {
-        question: "How long does a typical project take?",
-        answer: "Timelines vary depending on scope. A standard brand design or website development project usually takes between 4 to 8 weeks. Larger campaigns or complex Web3 platforms can take 12 weeks or more. We establish clear phases during planning."
+        question: "How does your B2B partnership model work?",
+        answer: "Dits and Dots serves as your extended team, providing seamless integration, dedicated teams, and long-term reliability so your technology stack stays ahead of the curve."
       },
       {
-        question: "Do you work with international clients?",
-        answer: "Yes, we work globally. We are physically situated in Lalitpur, Nepal and Dallas, Texas, allowing us to collaborate seamlessly with clients across the US, Europe, and South Asia."
+        question: "Where are you located and do you work globally?",
+        answer: "We are based at 3620 Adelaide, The Colony, TX 75056, and partner with global brands across time zones."
       },
       {
-        question: "What is your pricing structure?",
-        answer: "We operate on flat project-based pricing or ongoing monthly retainers depending on what fits your workflow. Every project starts with a detailed scoping phase where we provide a transparent, all-inclusive budget before starting."
+        question: "How do we start a project?",
+        answer: "Reach out via email at hello@ditsanddots.com or call +1 (817) 330-9194 to discuss your goals and scope."
       }
     ]
   },
-  process: {
-    steps: [
-      { id: "01", title: "Brief", description: "A call, a scope, a number. No proposal theatre." },
-      { id: "02", title: "Plan", description: "Structure, references and a budget you sign off." },
-      { id: "03", title: "Make", description: "Design, build, shoot, edit. One team, in house." },
-      { id: "04", title: "Launch", description: "Ship it, measure it, keep it running." }
-    ]
-  },
-  people: {
-    team: [
-      { name: "Aabhiskar KC", role: "CEO", description: "Runs the studio and sits on every brief. If the scope changes, he is the one who tells you.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: true, socials: [] },
-      { name: "Yashmine Gurung", role: "Creative Lead", description: "Holds the art direction across brand, campaign and film so the work looks like one studio made it.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: true, socials: [] },
-      { name: "Nisika Shrestha", role: "People & Operations", description: "Hiring, onboarding and the reason projects have the right people on them in the right week.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: false, socials: [] },
-      { name: "Nikhil Tuladhar", role: "Engineering", description: "Builds and maintains what we ship. Infrastructure, performance and the parts nobody sees.", avatarUrl: "", originalAvatarUrl: "", isBookmarked: false, socials: [] }
-    ],
-    extraCount: 6
-  },
+  process: { steps: [] },
+  people: { team: [], extraCount: 0 },
   logos: [
-    { id: 1, name: "VERTEX", imageUrl: "" },
-    { id: 2, name: "KINETIC", imageUrl: "" },
-    { id: 3, name: "APEX", imageUrl: "" },
-    { id: 4, name: "SPECTRUM", imageUrl: "" },
-    { id: 5, name: "COSMOS", imageUrl: "" },
-    { id: 6, name: "QUANTUM", imageUrl: "" },
-    { id: 7, name: "NEXUS", imageUrl: "" },
-    { id: 8, name: "ELEVATE", imageUrl: "" }
+    { id: 1, name: "NCSC", imageUrl: "" },
+    { id: 2, name: "NOOR", imageUrl: "" },
+    { id: 3, name: "COMMSCOPE", imageUrl: "" },
+    { id: 4, name: "BYTERACK", imageUrl: "" },
+    { id: 5, name: "NEXUS AI", imageUrl: "" }
   ],
   stats: [
-    { id: 1, value: 30, suffix: "+", display: undefined, label: "Projects Delivered" },
-    { id: 2, value: 15, suffix: "+", display: undefined, label: "Clients Worked With" },
-    { id: 3, value: 6, suffix: "+", display: undefined, label: "Creative Capabilities" },
-    { id: 4, value: 0, suffix: "", display: "∞", label: "Ideas Turned Real" }
+    { id: 1, value: 99, suffix: "%", display: undefined, label: "Project Success" },
+    { id: 2, value: 92, suffix: "%", display: undefined, label: "Client Retention" },
+    { id: 3, value: 0, suffix: "", display: "99.9%", label: "Uptime Guarantee" },
+    { id: 4, value: 45, suffix: "%", display: undefined, label: "ROI Increase" }
   ],
   testimonials: [
-    { id: 1, quote: "They rebuilt the site and the brand in the same pass, so nothing felt bolted on. First month after launch, enquiries doubled.", authorName: "Kiran Gurung", authorRole: "Founder, Vertex", theme: "light" },
-    { id: 2, quote: "The build is stable and the handover was clean. Our own team picked it up in a week without a single call.", authorName: "Sushma Bhandari", authorRole: "Product Lead, Kinetic", theme: "light" },
-    { id: 3, quote: "We came for a video and left with a whole system: identity, site, launch campaign. One team, one invoice, one standard.", authorName: "Daniel Reyes", authorRole: "CMO, Apex", theme: "light" },
-    { id: 4, quote: "Timelines held. That is rarer than it should be, and it is why we are on the third project with them.", authorName: "Priya Adhikari", authorRole: "Director, Spectrum", theme: "dark" }
+    { id: 1, quote: "Dits and Dots serves as our extended engineering team — their seamless integration and dedicated support helped us launch on schedule.", authorName: "NCSC Team", authorRole: "Public App & POS System", theme: "light" },
+    { id: 2, quote: "Their data-driven SEO and digital marketing strategy amplified our brand presence and delivered measurable ROI across every channel.", authorName: "Noor Leadership", authorRole: "Digital Marketing Partner", theme: "light" },
+    { id: 3, quote: "From cloud automation to UI/UX, they don't just deliver code — they build comprehensive digital ecosystems that evolve with our business.", authorName: "Byterack Aerolutiom Inc", authorRole: "Automation & Cloud", theme: "light" },
+    { id: 4, quote: "Combining AI-driven workflows with sharp product design, the Nexus AI Platform launch exceeded every performance benchmark.", authorName: "Nexus AI", authorRole: "AI Platform & UI/UX", theme: "dark" }
   ],
-  careers: {
-    badge: "CAREERS",
-    title: "We are hiring",
-    description: "Send the project you are proudest of. If it is good we will find a seat for you, listed role or not.",
-    roles: [
-      { id: 1, title: "Frontend Engineer", location: "Lalitpur", type: "Full-time" },
-      { id: 2, title: "Motion Designer", location: "Hybrid", type: "Full-time" },
-      { id: 3, title: "Growth Strategist", location: "Dallas", type: "Contract" }
-    ]
-  },
+  careers: { badge: "CAREERS", title: "We are hiring", description: "", roles: [] },
   contact: {
-    headlineLine1: "Let's make",
-    headlineLine2: "the thing.",
-    description: "Tell us what you are trying to launch and roughly when. You will get a scope and a number, not a deck.",
-    email: "abstraktcreation@gmail.com",
-    phone: "+977 9823901866",
+    headlineLine1: "Let's Build Something",
+    headlineLine2: "Extraordinary.",
+    description: "Ready to elevate your digital presence? Reach out to us today and let's discuss how we can help your business grow.",
+    email: "hello@ditsanddots.com",
+    phone: "+1 (817) 330-9194",
     skills: [
-      { id: 1, label: "React", accent: true },
-      { id: 2, label: "Next.js", accent: false },
-      { id: 3, label: "Web Solutions", accent: true },
-      { id: 4, label: "API Integration", accent: true },
-      { id: 5, label: "Dashboards", accent: false },
-      { id: 6, label: "3D & Animation", accent: false },
-      { id: 7, label: "Social Media", accent: true },
-      { id: 8, label: "Music Production", accent: true },
-      { id: 9, label: "Video Production", accent: false },
-      { id: 10, label: "Graphic Design", accent: true },
+      { id: 1, label: "Web Development", accent: true },
+      { id: 2, label: "AI-Driven Apps", accent: false },
+      { id: 3, label: "Digital Marketing", accent: true },
+      { id: 4, label: "Graphic Designing", accent: true },
+      { id: 5, label: "Video Editing", accent: false },
+      { id: 6, label: "React", accent: false },
+      { id: 7, label: "Next.js", accent: true },
+      { id: 8, label: "Full-Stack", accent: true },
+      { id: 9, label: "Cloud & Automation", accent: false },
+      { id: 10, label: "SEO & Growth", accent: true },
       { id: 11, label: "UI/UX Design", accent: true },
-      { id: 12, label: "System Architecture", accent: false },
-      { id: 13, label: "Digital Marketing", accent: false },
-      { id: 14, label: "Creative", accent: false },
-      { id: 15, label: "Motion Design", accent: true },
-      { id: 16, label: "Brand Systems", accent: false }
+      { id: 12, label: "POS Systems", accent: false },
+      { id: 13, label: "Machine Learning", accent: false },
+      { id: 14, label: "Brand Systems", accent: true }
     ]
   }
 };
@@ -1012,11 +1043,11 @@ app.get('/api/content', async (req, res) => {
     };
 
     const formattedContact = {
-      headlineLine1: contactRows[0]?.headlineLine1 || "Let's make",
-      headlineLine2: contactRows[0]?.headlineLine2 || "the thing.",
-      description: contactRows[0]?.description || "Tell us what you are trying to launch and roughly when. You will get a scope and a number, not a deck.",
-      email: contactRows[0]?.email || "abstraktcreation@gmail.com",
-      phone: contactRows[0]?.phone || "+977 9823901866",
+      headlineLine1: contactRows[0]?.headlineLine1 || "Let's Build Something",
+      headlineLine2: contactRows[0]?.headlineLine2 || "Extraordinary.",
+      description: contactRows[0]?.description || "Ready to elevate your digital presence? Reach out to us today and let's discuss how we can help your business grow.",
+      email: contactRows[0]?.email || "hello@ditsanddots.com",
+      phone: contactRows[0]?.phone || "+1 (817) 330-9194",
       skills: (contactSkillRows || [])
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map(s => ({
@@ -1093,11 +1124,11 @@ app.post('/api/content/clear', async (req, res) => {
       })
       .where(eq(position.id, 1));
 
-    // 3. Clear Capabilities (reset values of digital, identity, campaign, creative)
+    // 3. Clear Capabilities (reset values of the 5 Dits and Dots pillars)
     await db.delete(capabilities);
-    const defaultKeys = ['digital', 'identity', 'campaign', 'creative'];
-    const slotIds = ['01', '02', '03', '04'];
-    const labels = ['LEADING', 'SHAPING', 'ENGAGING', 'EXPRESSING'];
+    const defaultKeys = ['web', 'marketing', 'ai', 'design', 'video'];
+    const slotIds = ['01', '02', '03', '04', '05'];
+    const labels = ['ENGINEERING', 'GROWTH', 'INTELLIGENCE', 'DESIGN', 'MEDIA'];
     for (let i = 0; i < defaultKeys.length; i++) {
       await db.insert(capabilities).values({
         id: defaultKeys[i],
@@ -1292,7 +1323,7 @@ app.post('/api/content/:id', async (req, res) => {
     else if (id === 'faq') {
       const badge = contentBody.badge || "GOT QUESTIONS?";
       const title = contentBody.title || "FREQUENTLY ASKED QUESTIONS";
-      const description = contentBody.description || "Find answers to the most common questions about Abstrakt Creation and our comprehensive digital, creative, and branding services.";
+      const description = contentBody.description || "Find answers to the most common questions about Dits and Dots Agency and our web, AI, marketing, and creative media services.";
       const buttonText = contentBody.buttonText || "VIEW ALL FAQS +";
 
       await db.update(faqsMetadata)
@@ -1483,5 +1514,6 @@ app.post('/api/content/:id', async (req, res) => {
 
 app.listen(port, async () => {
   console.log(`Backend Express server is running on http://localhost:${port}`);
+  await initDbSchema();
   await seedDatabase();
 });

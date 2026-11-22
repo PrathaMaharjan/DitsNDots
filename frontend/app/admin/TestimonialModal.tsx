@@ -54,7 +54,7 @@ export default function TestimonialModal({ testimonial, onSave, onClose }: Testi
       quote: quote.trim(),
       authorName: authorName.trim(),
       authorRole: authorRole.trim(),
-      theme,
+      theme: "light",
     });
   };
 
@@ -124,36 +124,6 @@ export default function TestimonialModal({ testimonial, onSave, onClose }: Testi
                 onChange={(e) => setAuthorRole(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
               />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-mono font-bold tracking-widest text-neutral-500 uppercase mb-2">
-              Card Color Theme
-            </label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
-                <input
-                  type="radio"
-                  name="theme"
-                  value="light"
-                  checked={theme === "light"}
-                  onChange={() => setTheme("light")}
-                  className="text-brand focus:ring-brand"
-                />
-                Light Card (Default)
-              </label>
-              <label className="flex items-center gap-2 text-sm cursor-pointer font-medium">
-                <input
-                  type="radio"
-                  name="theme"
-                  value="dark"
-                  checked={theme === "dark"}
-                  onChange={() => setTheme("dark")}
-                  className="text-brand focus:ring-brand"
-                />
-                Dark Card (Accent)
-              </label>
             </div>
           </div>
 

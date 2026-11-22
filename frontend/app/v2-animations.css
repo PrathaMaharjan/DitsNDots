@@ -118,7 +118,7 @@
   right: 0;
   bottom: -3px;
   height: 1px;
-  background: #f2997c;
+  background: #0082C8;
   transform: scaleX(0);
   transform-origin: left center;
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -135,7 +135,7 @@
   transform-origin: right center;
 }
 .ab-flink:focus-visible {
-  outline: 2px solid #f2997c;
+  outline: 2px solid #0082C8;
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -244,16 +244,16 @@
    lifts slightly. The open row keeps a plain chevron since clicking it
    again is intentionally a no-op. */
 .ab-faq-btn:hover span:nth-child(2) {
-  color: #e84610;
+  color: #475569;
 }
 .ab-faq-btn span:nth-child(2) {
   transition: color 0.25s ease;
 }
 .ab-faq-btn:hover .ab-faq-chevron {
-  background: #3c14a0;
+  background: #CBD5E1 !important;
 }
 .ab-faq-btn:focus-visible {
-  outline: 2px solid #e84610;
+  outline: 2px solid #64748B;
   outline-offset: 4px;
   border-radius: 4px;
 }
@@ -428,58 +428,69 @@
    --------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference) {
   [data-rv] {
-    --ab-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ab-ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Eyebrow label — "(05) THE PEOPLE" */
+  /* Eyebrow label */
   [data-rv="eyebrow"] {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(16px);
+    filter: blur(4px);
     transition:
-      opacity 0.6s var(--ab-ease) calc(var(--rv-i, 0) * 70ms),
-      transform 0.6s var(--ab-ease) calc(var(--rv-i, 0) * 70ms);
+      opacity 0.75s var(--ab-ease) calc(var(--rv-i, 0) * 80ms),
+      transform 0.8s var(--ab-ease) calc(var(--rv-i, 0) * 80ms),
+      filter 0.75s var(--ab-ease) calc(var(--rv-i, 0) * 80ms);
   }
 
   /* Masked line-rise for display headlines */
   [data-rv="line"] {
     display: block;
     overflow: hidden;
-    padding-bottom: 0.06em;
+    padding-bottom: 0.08em;
   }
   [data-rv="line"] > span {
     display: block;
+    opacity: 0;
     transform: translateY(108%);
-    transition: transform 0.9s var(--ab-ease) calc(var(--rv-i, 0) * 90ms);
+    transition:
+      transform 1s var(--ab-ease) calc(var(--rv-i, 0) * 100ms),
+      opacity 0.6s var(--ab-ease) calc(var(--rv-i, 0) * 100ms);
   }
 
   /* Divider rule drawing out from the left */
   [data-rv="rule"] {
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform 0.8s var(--ab-ease) 0.15s;
+    transition: transform 0.9s var(--ab-ease) 0.14s;
   }
 
   /* Content item variants */
   [data-rv="up"] {
     opacity: 0;
-    transform: translateY(26px);
+    transform: translateY(34px);
+    filter: blur(4px);
     transition:
-      opacity 0.65s var(--ab-ease) calc(var(--rv-i, 0) * 70ms),
-      transform 0.65s var(--ab-ease) calc(var(--rv-i, 0) * 70ms);
+      opacity 0.85s var(--ab-ease) calc(var(--rv-i, 0) * 85ms),
+      transform 0.9s var(--ab-ease) calc(var(--rv-i, 0) * 85ms),
+      filter 0.85s var(--ab-ease) calc(var(--rv-i, 0) * 85ms);
   }
   [data-rv="scale"] {
     opacity: 0;
-    transform: scale(0.96);
+    transform: translateY(24px) scale(0.96);
+    filter: blur(4px);
     transition:
-      opacity 0.7s var(--ab-ease) calc(var(--rv-i, 0) * 70ms),
-      transform 0.7s var(--ab-ease) calc(var(--rv-i, 0) * 70ms);
+      opacity 0.9s var(--ab-ease) calc(var(--rv-i, 0) * 85ms),
+      transform 0.95s var(--ab-ease) calc(var(--rv-i, 0) * 85ms),
+      filter 0.9s var(--ab-ease) calc(var(--rv-i, 0) * 85ms);
   }
   [data-rv="left"] {
     opacity: 0;
-    transform: translateX(-18px);
+    transform: translateX(-22px);
+    filter: blur(3px);
     transition:
-      opacity 0.6s var(--ab-ease) calc(var(--rv-i, 0) * 55ms),
-      transform 0.6s var(--ab-ease) calc(var(--rv-i, 0) * 55ms);
+      opacity 0.75s var(--ab-ease) calc(var(--rv-i, 0) * 65ms),
+      transform 0.8s var(--ab-ease) calc(var(--rv-i, 0) * 65ms),
+      filter 0.75s var(--ab-ease) calc(var(--rv-i, 0) * 65ms);
   }
 
   /* Resting state, applied once the section enters */
@@ -489,13 +500,43 @@
   .ab-in [data-rv="left"] {
     opacity: 1;
     transform: none;
+    filter: blur(0);
   }
   .ab-in [data-rv="line"] > span {
+    opacity: 1;
     transform: none;
   }
   .ab-in [data-rv="rule"] {
     transform: scaleX(1);
   }
+}
+
+/* Works carousel manual prev/next glass dock buttons */
+.ab-works-nav-btn {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0B111A;
+  color: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.28s ease;
+}
+.ab-works-nav-btn:hover {
+  background: #FFFFFF;
+  color: #0B111A;
+  border-color: #FFFFFF;
+  transform: scale(1.06);
+}
+.ab-works-nav-btn:active {
+  transform: scale(0.94);
 }
 
 /* ---------------------------------------------------------------
@@ -715,7 +756,7 @@
   transition: color 0.4s ease, transform 0.5s var(--cap-ease);
 }
 .ab-cap-row.is-open .ab-cap-row__t {
-  color: #f2997c;
+  color: #38BDF8;
 }
 .ab-cap-row__l {
   transition: color 0.4s ease, opacity 0.4s ease;

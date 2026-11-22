@@ -18,7 +18,7 @@ export default function TestimonialsV2({ data }: TestimonialsV2Props) {
   if (quotes.length === 0) return null;
 
   return (
-    <section data-reveal="1" data-depth="flat" data-screen-label="Testimonials" style={{ padding: "clamp(60px,9vh,110px) 0", overflow: "hidden" }}>
+    <section id="reviews" data-reveal="1" data-screen-label="Testimonials" style={{ padding: "clamp(88px,12.5vh,148px) 0", overflow: "hidden" }}>
       <div data-depth-inner="1" className="ab-grid-split" style={{ maxWidth: 1680, margin: "0 auto", padding: "0 clamp(18px,3.6vw,60px)", display: "grid", gridTemplateColumns: "minmax(0,.85fr) minmax(0,1.6fr)", gap: "clamp(24px,4vw,64px)", alignItems: "center" }}>
         <div>
           <h2 style={{ margin: "0 0 26px", fontFamily: displayFont, fontWeight: 700, fontSize: "clamp(30px,4.4vw,64px)", lineHeight: 0.98, letterSpacing: "-.04em", maxWidth: "16ch" }}>
@@ -54,7 +54,7 @@ export default function TestimonialsV2({ data }: TestimonialsV2Props) {
           style={{ ["--rv-i" as string]: 3, position: "relative", height: 480, overflow: "hidden", touchAction: "pan-y" }}
         >
           {quotes.map((t, i) => {
-            const dark = t.theme === "dark";
+            const dark = false;
             return (
               <blockquote
                 key={i}
@@ -78,7 +78,7 @@ export default function TestimonialsV2({ data }: TestimonialsV2Props) {
                   transition: "transform .6s ease-in-out,opacity .6s ease-in-out",
                 }}
               >
-                <span style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 46, lineHeight: 0.6, color: dark ? "#F2997C" : "#E84610" }}>
+                <span style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 46, lineHeight: 0.6, color: dark ? "#38BDF8" : "#0082C8" }}>
                   &ldquo;
                 </span>
                 <p style={{ margin: 0, fontSize: "clamp(16px,1.35vw,21px)", lineHeight: 1.55, color: dark ? undefined : "#2A2A28" }}>{t.quote}</p>

@@ -38,14 +38,22 @@ export default function SidebarMenuV2({ open, onClose, onNavigate, closeRef }: S
           would only add a duplicate tab stop. */}
       <div className="ms2__field" onClick={onClose}>
         <span className="ms2__mark">
-          ABSTRAKT<span className="ms2__mark-dot">.</span>
+          DITS<span style={{ color: "#0082C8" }}>N</span>DOTS
         </span>
       </div>
 
       <aside className="ms2__panel">
         <div className="ms2__head">
-          <span className="ms2__wordmark">
-            ABSTRAKT<span className="ms2__wordmark-dot">.</span>
+          <span className="ms2__wordmark" style={{ display: "inline-flex", alignItems: "center", gap: 11 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo.png"
+              alt="Dits N Dots logo"
+              style={{ width: 34, height: 34, objectFit: "contain", display: "block" }}
+            />
+            <span>
+              DITS<span style={{ color: "#0082C8" }}>N</span>DOTS
+            </span>
           </span>
           <button type="button" ref={closeRef} className="ms2__close" onClick={onClose} aria-label="Close menu">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">

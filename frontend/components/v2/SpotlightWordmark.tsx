@@ -149,7 +149,7 @@ export default function SpotlightWordmark() {
           bottom: -BLEED,
           // Only the horizontal centre needs the bleed offset added, since
           // the layer's top-left origin is inset on x but flush on y.
-          background: `radial-gradient(circle var(--r) at calc(var(--mx) + ${BLEED}px) var(--my), rgba(242, 153, 124,.20) 0%, rgba(242, 153, 124,.10) 42%, rgba(242, 153, 124,.03) 68%, rgba(242, 153, 124,0) 100%)`,
+          background: `radial-gradient(circle var(--r) at calc(var(--mx) + ${BLEED}px) var(--my), rgba(56, 189, 248,.20) 0%, rgba(56, 189, 248,.10) 42%, rgba(56, 189, 248,.03) 68%, rgba(56, 189, 248,0) 100%)`,
           // Pinning the top edge would trade the spill for a hard horizontal
           // cut across the glow. This ramps the layer's own alpha to zero
           // over its first stretch, so the glow simply thins out as it
@@ -168,7 +168,7 @@ export default function SpotlightWordmark() {
           WebkitTextStroke: "1px rgba(250,250,250,.22)",
         }}
       >
-        ABSTRAKT
+        DITSNDOTS
       </span>
       <span
         aria-hidden="true"
@@ -177,13 +177,13 @@ export default function SpotlightWordmark() {
           position: "absolute",
           inset: 0,
           display: "block",
-          color: "#F2997C",
+          color: "#38BDF8",
           pointerEvents: "none",
           WebkitMaskImage: MASK,
           maskImage: MASK,
         }}
       >
-        ABSTRAKT
+        DITSNDOTS
       </span>
     </div>
   );

@@ -9,7 +9,7 @@ html {
 :root {
   --background: #F7F6F3;
   --foreground: #0E0E0E;
-  --brand: #E84610;
+  --brand: #0082C8;
   --brand-muted: #6B7280;
   --card-bg: #EAE9E4;
 }
@@ -30,11 +30,57 @@ body {
   font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* Hide browser scrollbars globally while preserving smooth wheel/touch scrolling */
+html,
+body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Pure GPU-composited smooth bottom-to-top rise for /work and /work/[slug].
+   A ::before curved cream cap rides at top: -44px so the leading edge is visibly
+   curved while rising from below, then naturally slides offscreen above the
+   viewport so the settled page is completely flat — zero border-radius repaints! */
+@keyframes ab-sheet-rise-curved {
+  0% {
+    transform: translate3d(0, 100vh, 0) scaleX(0.95);
+  }
+
+  100% {
+    transform: translate3d(0, 0, 0) scaleX(1);
+  }
+}
+
+.ab-sheet-rise {
+  transform-origin: center top;
+  animation: ab-sheet-rise-curved 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ab-sheet-rise::before {
+  content: "";
+  position: absolute;
+  top: -44px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: #F7F6F3;
+  border-top-left-radius: 48px;
+  border-top-right-radius: 48px;
+  pointer-events: none;
+}
+
 /* Routes that end on the dark footer paint the canvas dark. The body
    background is what fills scroll overshoot and any sub-pixel gap under the
    last element — left light it reads as a white band below the footer. */
 body:has(.ab-page-dark-end) {
-  background: #100A1E;
+  background: #02AA7A;
 }
 
 /* Text selection in brand purple rather than the browser's default blue —
@@ -43,12 +89,13 @@ body:has(.ab-page-dark-end) {
    purple type. The sections that run on a dark field override it below,
    where this pairing would disappear. */
 ::selection {
-  background: rgba(232, 70, 16, 0.16);
-  color: #E84610;
+  background: rgba(0, 130, 200, 0.16);
+  color: #0082C8;
 }
+
 ::-moz-selection {
-  background: rgba(232, 70, 16, 0.16);
-  color: #E84610;
+  background: rgba(0, 130, 200, 0.16);
+  color: #0082C8;
 }
 
 /* Dark sections (hero, the works carousel) invert it: deep brand behind
@@ -57,6 +104,7 @@ body:has(.ab-page-dark-end) {
   background: rgba(232, 70, 16, 0.55);
   color: #C4AEFF;
 }
+
 [data-nav-tone="dark"] ::-moz-selection {
   background: rgba(232, 70, 16, 0.55);
   color: #C4AEFF;
@@ -66,6 +114,7 @@ body:has(.ab-page-dark-end) {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -79,6 +128,7 @@ body:has(.ab-page-dark-end) {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-33.3333%);
   }
@@ -96,8 +146,15 @@ body:has(.ab-page-dark-end) {
 
 /* Typewriter animation styling */
 @keyframes blink {
-  from, to { border-color: transparent }
-  50% { border-color: var(--brand) }
+
+  from,
+  to {
+    border-color: transparent
+  }
+
+  50% {
+    border-color: var(--brand)
+  }
 }
 
 .typewriter-cursor {
@@ -111,20 +168,53 @@ body:has(.ab-page-dark-end) {
    is a short fade+rises. Brand-tinted so it feels native, not grey.
 ------------------------------------------------------------------- */
 @keyframes ab-skeleton-shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+
+  100% {
+    background-position: 400px 0;
+  }
 }
+
 @keyframes ab-skel-fade-up {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
+
 @keyframes ab-skel-pulse-dot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.35); opacity: 0.55; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.35);
+    opacity: 0.55;
+  }
 }
+
 @keyframes ab-skel-orb-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-  50% { transform: translate(24px, -18px) scale(1.08); opacity: 0.75; }
+
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translate(24px, -18px) scale(1.08);
+    opacity: 0.75;
+  }
 }
 
 .ab-skeleton {
@@ -132,32 +222,31 @@ body:has(.ab-page-dark-end) {
   overflow: hidden;
   display: block;
   background-color: #e8e6e1;
-  background-image: linear-gradient(
-    100deg,
-    rgba(255, 255, 255, 0) 30%,
-    rgba(255, 255, 255, 0.75) 48%,
-    rgba(232, 70, 16, 0.1) 52%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  background-image: linear-gradient(100deg,
+      rgba(255, 255, 255, 0) 30%,
+      rgba(255, 255, 255, 0.75) 48%,
+      rgba(232, 70, 16, 0.1) 52%,
+      rgba(255, 255, 255, 0) 70%);
   background-size: 800px 100%;
   background-repeat: no-repeat;
   animation:
     ab-skeleton-shimmer 1.7s ease-in-out infinite,
     ab-skel-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 .ab-skeleton--dark {
   background-color: #221d33;
-  background-image: linear-gradient(
-    100deg,
-    rgba(255, 255, 255, 0) 30%,
-    rgba(242, 153, 124, 0.22) 48%,
-    rgba(242, 153, 124, 0.32) 52%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  background-image: linear-gradient(100deg,
+      rgba(255, 255, 255, 0) 30%,
+      rgba(242, 153, 124, 0.22) 48%,
+      rgba(242, 153, 124, 0.32) 52%,
+      rgba(255, 255, 255, 0) 70%);
 }
+
 .ab-skel-fade {
   animation: ab-skel-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
 .ab-skel-eyebrow {
   font-family: var(--font-geist-mono), monospace;
   font-size: 11px;
@@ -166,9 +255,11 @@ body:has(.ab-page-dark-end) {
   text-transform: uppercase;
   color: #8a877f;
 }
+
 .ab-skel-eyebrow--dark {
   color: rgba(196, 174, 255, 0.75);
 }
+
 .ab-skel-pulse {
   width: 10px;
   height: 10px;
@@ -178,10 +269,12 @@ body:has(.ab-page-dark-end) {
   animation: ab-skel-pulse-dot 1.4s ease-in-out infinite;
   flex-shrink: 0;
 }
+
 .ab-skel-pulse--dark {
   background: #f2997c;
   box-shadow: 0 0 0 4px rgba(242, 153, 124, 0.18);
 }
+
 .ab-skel-orb {
   position: absolute;
   width: 420px;
@@ -192,10 +285,12 @@ body:has(.ab-page-dark-end) {
   animation: ab-skel-orb-drift 5s ease-in-out infinite;
   pointer-events: none;
 }
+
 .ab-skel-orb--2 {
   background: radial-gradient(circle, rgba(242, 153, 124, 0.28), transparent 65%);
   animation-delay: -2.5s;
 }
+
 .ab-skel-rowcard {
   border: 1px solid #e7e6e1;
   border-radius: 20px;
@@ -204,19 +299,25 @@ body:has(.ab-page-dark-end) {
 }
 
 @media (max-width: 900px) {
-  .ab-skel-cardwrap:nth-child(n + 2) { display: none; }
-  .ab-skel-admin { grid-template-columns: minmax(0, 1fr) !important; }
+  .ab-skel-cardwrap:nth-child(n + 2) {
+    display: none;
+  }
+
+  .ab-skel-admin {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .ab-skeleton,
   .ab-skel-fade,
   .ab-skel-pulse,
   .ab-skel-orb {
     animation: none;
   }
-  .ab-skeleton { opacity: 0.75; }
+
+  .ab-skeleton {
+    opacity: 0.75;
+  }
 }
-
-
-

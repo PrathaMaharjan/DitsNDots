@@ -13,18 +13,15 @@ export type NavLink = { label: string; href: string };
 export const NAV_LINKS: NavLink[] = [
   { label: "WORK", href: "#work" },
   { label: "CAPABILITIES", href: "#capabilities" },
-  { label: "STUDIO", href: "#studio" },
-  { label: "CAREERS", href: "#careers" },
   { label: "CONTACT", href: "#contact" },
 ];
 
-export const STUDIOS = ["Sanepa, Lalitpur, Nepal", "3620 Adelaide, The Colony, TX"];
+export const STUDIOS = ["3620 Adelaide, The Colony, TX 75056"];
 
 export type ContactLink = { label: string; href: string; strong?: boolean };
 
 export const CONTACTS: ContactLink[] = [
-  { label: "abstraktcreation@gmail.com", href: "mailto:abstraktcreation@gmail.com", strong: true },
-  { label: "+977 9823901866", href: "tel:+9779823901866" },
+  { label: "hello@ditsanddots.com", href: "mailto:hello@ditsanddots.com", strong: true },
   { label: "+1 (817) 330-9194", href: "tel:+18173309194" },
 ];
 

@@ -170,7 +170,7 @@
 }
 
 .ms2__wordmark-dot {
-  color: var(--ms-brand-light);
+  color: #38BDF8;
 }
 
 .ms2__close {
@@ -247,7 +247,7 @@
 }
 
 .ms2__word--accent {
-  color: var(--ms-brand-light);
+  color: #38BDF8;
 }
 
 /* ---------- CTA ---------- */
@@ -319,7 +319,7 @@
 
 .ms2__meta-link:hover,
 .ms2__meta-link:focus-visible {
-  color: var(--ms-brand-light);
+  color: #38BDF8;
 }
 
 /* ---------- Socials ---------- */

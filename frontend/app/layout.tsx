@@ -35,9 +35,9 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "Abstrakt — One studio for the site, the brand, and everything that carries it.",
+  title: "DitsNDots ",
   description:
-    "Web solutions, brand systems, campaigns, video, 3D and sound. Built in house, from the first call to the thing that ships.",
+    "Your end-to-end partner for Web Development, AI Solutions, and Creative Media. We build the future, one dot at a time.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

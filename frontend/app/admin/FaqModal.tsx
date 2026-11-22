@@ -79,7 +79,7 @@ export default function FaqModal({ faq, onSave, onClose }: FaqModalProps) {
             </label>
             <input
               type="text"
-              placeholder="e.g. What services does Abstrakt Creation offer?"
+              placeholder="e.g. What services does Dits and Dots offer?"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand font-bold text-foreground"

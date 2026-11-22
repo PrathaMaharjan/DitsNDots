@@ -108,6 +108,7 @@ export default function CapabilitiesForm({ data, onChange, onStartEditing, onAdd
             title: updatedService.title,
             description: updatedService.description,
             imageUrl: updatedService.imageUrl,
+            tag: updatedService.tag !== undefined ? updatedService.tag : currentPillar.tag,
           },
         },
       });
@@ -190,6 +191,11 @@ export default function CapabilitiesForm({ data, onChange, onStartEditing, onAdd
                   {pillar.description && (
                     <p className="text-xs text-neutral-500 line-clamp-1 max-w-xl">
                       {pillar.description}
+                    </p>
+                  )}
+                  {pillar.tag && (
+                    <p className="text-[11px] font-mono text-brand mt-0.5">
+                      Tags: {pillar.tag}
                     </p>
                   )}
                 </div>

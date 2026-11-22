@@ -216,7 +216,7 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
           cur.style.opacity = "1";
           cur.style.width = "112px";
           cur.style.height = "112px";
-          cur.style.background = "#E84610";
+          cur.style.background = "#0E0E0E";
           if (label) label.style.opacity = "1";
         } else {
           cur.style.opacity = "0";
@@ -309,7 +309,8 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
     const applyTone = () => {
       if (!nav) return;
       let tone = "light";
-      for (const section of toneSections) {
+      for (let i = toneSections.length - 1; i >= 0; i--) {
+        const section = toneSections[i];
         const r = section.getBoundingClientRect();
         if (r.top <= NAV_MIDLINE && r.bottom >= NAV_MIDLINE) {
           tone = section.dataset.navTone || "light";

@@ -23,7 +23,7 @@ export default function FaqV2({ data }: FaqV2Props) {
   if (questions.length === 0) return null;
 
   return (
-    <section data-reveal="1" data-depth="flat" data-screen-label="FAQ" style={{ maxWidth: 1680, margin: "0 auto", padding: "clamp(60px,9vh,110px) clamp(18px,3.6vw,60px)" }}>
+    <section id="faq" data-reveal="1" data-screen-label="FAQ" style={{ maxWidth: 1680, margin: "0 auto", padding: "clamp(88px,12.5vh,148px) clamp(18px,3.6vw,60px) clamp(104px,14.5vh,172px)" }}>
       <div data-depth-inner="dim" className="ab-grid-split" style={{ display: "grid", gridTemplateColumns: "minmax(0,.8fr) minmax(0,1.8fr)", gap: "clamp(28px,4vw,72px)", alignItems: "start" }}>
         <div className="ab-sticky-head" style={{ position: "sticky", top: 120 }}>
           <h2 style={{ margin: 0, fontFamily: displayFont, fontWeight: 700, fontSize: "clamp(30px,4.2vw,62px)", lineHeight: 0.96, letterSpacing: "-.04em" }}>
@@ -71,8 +71,8 @@ export default function FaqV2({ data }: FaqV2Props) {
                   aria-hidden="true"
                   style={{ flex: "0 0 auto", position: "relative", width: 16, height: 16 }}
                 >
-                  <span style={{ position: "absolute", top: 7, left: 0, width: 16, height: 2, background: "#E84610" }} />
-                  <span style={{ position: "absolute", left: 7, top: 0, width: 2, height: 16, background: "#E84610" }} />
+                  <span style={{ position: "absolute", top: 7, left: 0, width: 16, height: 2, background: "#64748B" }} />
+                  <span style={{ position: "absolute", left: 7, top: 0, width: 2, height: 16, background: "#64748B" }} />
                 </span>
                 <span
                   style={{
@@ -98,8 +98,8 @@ export default function FaqV2({ data }: FaqV2Props) {
                     width: 38,
                     height: 38,
                     borderRadius: 999,
-                    background: "#E84610",
-                    color: "#fff",
+                    background: "#E2E4E9",
+                    color: "#0E0E0E",
                     fontSize: 15,
                     lineHeight: 1,
                     // Closed points down-right; the hook's 45° turn on open

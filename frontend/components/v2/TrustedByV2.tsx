@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import InfiniteMover from "./InfiniteMover";
 import { INK, LINE, BRAND, BODY_MUTED, displayFont } from "./tokens";
+import SectionHeading from "./SectionHeading";
 
 /** Luminance at or above this (0-255) is treated as background plate and
  *  erased. Only applied to images that actually have a plate — see the
@@ -272,36 +273,38 @@ export default function TrustedByV2({ data, stats }: TrustedByV2Props) {
   return (
     <section
       data-reveal="1"
-      data-depth="flat"
       data-screen-label="Trusted by"
       style={{
-        // Hairline rules top and bottom band the whole block off from the
-        // sections around it, the way the reference does — proof and
-        // numbers read as one unit rather than two stacked sections.
-        borderTop: `1px solid ${LINE}`,
         borderBottom: `1px solid ${LINE}`,
-        padding: "clamp(52px,8vh,88px) 0",
+        padding: "clamp(84px,11vh,130px) 0 clamp(76px,11vh,124px)",
         overflow: "hidden",
       }}
     >
       <div data-depth-inner="1" style={{ width: "100%" }}>
-        <div style={{ textAlign: "center", padding: "0 clamp(18px,3.6vw,60px)", marginBottom: "clamp(44px,6vh,68px)" }}>
-          <span
-            data-rv="eyebrow"
+        <div style={{ textAlign: "center", padding: "0 clamp(18px,3.6vw,60px)", marginBottom: "clamp(48px,6.5vh,76px)" }}>
+          <h2
             style={{
-              fontSize: "clamp(15px,1.5vw,19px)",
-              fontWeight: 600,
-              letterSpacing: ".01em",
+              margin: "0 auto",
+              fontFamily: displayFont,
+              fontSize: "clamp(28px, 3.6vw, 52px)",
+              fontWeight: 700,
+              lineHeight: 1.04,
+              letterSpacing: "-.035em",
               color: INK,
+              maxWidth: "24ch",
             }}
           >
-            Trusted by studios and founders in Nepal &amp; the US
-          </span>
+            <span data-rv="line">
+              <span>
+                <SectionHeading accent={2}>Trusted by global brands &amp; ambitious teams</SectionHeading>
+              </span>
+            </span>
+          </h2>
         </div>
 
         {/* Solid-colour edge fades sit above the row rather than masking it,
             so tiles slide out cleanly against the page ground. */}
-        <div style={{ position: "relative", width: "100%", overflow: "hidden" }}>
+        <div data-rv="up" style={{ ["--rv-i" as string]: 1, position: "relative", width: "100%", overflow: "hidden" }}>
           <div className="ab-marquee-fade ab-marquee-fade--l" />
           <div className="ab-marquee-fade ab-marquee-fade--r" />
           <InfiniteMover move="RL" duration={52} maskEdges={false}>
@@ -316,7 +319,7 @@ export default function TrustedByV2({ data, stats }: TrustedByV2Props) {
             className="ab-stat-row"
             style={{
               maxWidth: 1280,
-              margin: "clamp(52px,7vh,84px) auto 0",
+              margin: "clamp(68px,9vh,108px) auto 0",
               padding: "0 clamp(18px,3.6vw,60px)",
               display: "grid",
               gridTemplateColumns: `repeat(${statItems.length}, minmax(0,1fr))`,
@@ -351,7 +354,7 @@ export default function TrustedByV2({ data, stats }: TrustedByV2Props) {
                     fontSize: "clamp(30px,3.4vw,50px)",
                     lineHeight: 1,
                     letterSpacing: "-.03em",
-                    color: BRAND,
+                    color: "#0082C8",
                   }}
                 >
                   {stat.display ?? 0}

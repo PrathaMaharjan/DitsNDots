@@ -43,12 +43,13 @@
      on a sticky child to hold the type on screen while its words light, so
      clipping is scoped to .parallax__header (which is what actually holds
      the plates) rather than applied to the whole hero. */
-  background-color: var(--color-black);
+  background-color: #02AA7A;
   color: var(--color-light);
 }
 
 .parallax__header {
   z-index: 2;
+  background-color: var(--color-black);
   padding: var(--section-padding) var(--container-padding);
   justify-content: center;
   align-items: center;
@@ -73,8 +74,13 @@
 .parallax__content {
   min-height: 175svh;
   position: relative;
+  z-index: 6;
   display: block;
   padding: 0;
+  margin-bottom: -130px;
+  background-color: #F7F6F3;
+  border-radius: 0 0 48px 48px;
+  will-change: margin, border-radius;
 }
 
 .parallax__statement-sticky {
@@ -85,21 +91,20 @@
   align-items: center;
   justify-content: center;
   padding: var(--section-padding) var(--container-padding);
+  border-radius: inherit;
   overflow: hidden;
 }
 
-/* A brand pool behind the type, so the band reads as a lit space rather than
-   a flat black rectangle. Sits under the text via a negative z-index on the
-   pseudo-element's own stacking context. */
+/* Soft subtle wash on the cream ground matching the light theme sections. */
 .parallax__statement-sticky::before {
   content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(
     120% 80% at 50% 46%,
-    rgba(232, 70, 16, 0.26) 0%,
-    rgba(232, 70, 16, 0.07) 42%,
-    rgba(14, 14, 14, 0) 72%
+    rgba(2, 170, 122, 0.06) 0%,
+    rgba(0, 130, 200, 0.04) 42%,
+    rgba(247, 246, 243, 0) 72%
   );
   pointer-events: none;
 }
@@ -115,7 +120,7 @@
   letter-spacing: -0.02em;
   text-align: center;
   text-wrap: balance;
-  color: #f7f6f3;
+  color: #0E0E0E;
 }
 
 .parallax__visuals {
@@ -200,7 +205,7 @@
 }
 
 .parallax__fade {
-  --color-dark-rgb: 0, 0, 0;
+  --color-dark-rgb: 247, 246, 243;
   background: linear-gradient(
     to top,
     rgba(var(--color-dark-rgb), 1) 0%,
@@ -221,7 +226,7 @@
   object-fit: cover;
   width: 100%;
   max-width: none;
-  height: 20%;
+  height: 24%;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -229,7 +234,7 @@
 
 .parallax__black-line-overflow {
   z-index: 20;
-  background-color: var(--color-black);
+  background-color: #F7F6F3;
   width: 100%;
   height: 2px;
   position: absolute;

@@ -1,78 +1,121 @@
-// Static content for the Home landing page — no backend/API involved.
-// Copy is taken directly from the "Abstrakt Home" Claude Design source.
+// Static content for the Dits and Dots Agency Home landing page.
 
 export const heroContent = {
-  headlineLine1: "One studio for the site, the brand, and everything that carries it.",
+  headlineLine1: "Engineering Digital Excellence.",
   description:
-    "Web solutions, brand systems, campaigns, video, 3D and sound. Built in house, from the first call to the thing that ships.",
+    "Your end-to-end partner for Web Development, AI Solutions, and Creative Media. We build the future, one dot at a time.",
 };
 
 export const positionContent = {
   statement:
-    "We build the digital side of a business and the creative work around it. The site, the identity, the campaign, the content. One team, in house.",
+    "In the fast-paced digital landscape, reliability is the ultimate currency. Dits and Dots serves as your extended team, providing seamless integration and dedicated support for your most ambitious projects.",
 };
 
 export const logosContent = [
-  { name: "VERTEX" },
-  { name: "KINETIC" },
-  { name: "APEX" },
-  { name: "SPECTRUM" },
-  { name: "COSMOS" },
-  { name: "QUANTUM" },
-  { name: "NEXUS" },
-  { name: "ELEVATE" },
+  { name: "NCSC" },
+  { name: "NOOR" },
+  { name: "COMMSCOPE" },
+  { name: "BYTERACK" },
+  { name: "NEXUS AI" },
 ];
 
-// `display` opts a stat out of the count-up animation and renders as-is —
-// the last row is a symbol, which has no number to count toward.
+// `display` opts a stat out of the count-up animation and renders as-is.
 export const statsContent = [
-  { value: 30, suffix: "+", label: "Projects Delivered" },
-  { value: 15, suffix: "+", label: "Clients Worked With" },
-  { value: 6, suffix: "+", label: "Creative Capabilities" },
-  { value: 0, suffix: "", display: "∞", label: "Ideas Turned Real" },
+  { value: 99, suffix: "%", label: "Project Success" },
+  { value: 92, suffix: "%", label: "Client Retention" },
+  { value: 0, suffix: "", display: "99.9%", label: "Uptime Guarantee" },
+  { value: 45, suffix: "%", label: "ROI Increase" },
 ];
 
 export const capabilitiesContent = {
   pillars: {
-    digital: {
+    web: {
       id: "01",
-      label: "LEADING",
-      title: "DIGITAL",
+      label: "ENGINEERING",
+      title: "WEB DEVELOPMENT",
       description:
-        "High-performance web engineering and interface systems. Sites that load fast, scale cleanly and stay easy to run.",
-      tag: "Web platforms, UI/UX systems",
+        "High-performance, scalable web applications built with modern frameworks and cutting-edge tech.",
+      tag: "Web Development, Full-Stack",
     },
-    identity: {
+    marketing: {
       id: "02",
-      label: "SHAPING",
-      title: "IDENTITY",
-      description: "Brand architecture, bespoke type and art direction. A system your team can hold to, not a logo on a slide.",
-      tag: "Brand systems, Typography",
+      label: "GROWTH",
+      title: "DIGITAL MARKETING",
+      description:
+        "Data-driven strategies to amplify your brand presence and drive measurable growth across all channels.",
+      tag: "SEO, Performance Marketing",
     },
-    campaign: {
+    ai: {
       id: "03",
-      label: "ENGAGING",
-      title: "CAMPAIGN",
-      description: "Digital marketing, funnel work and content that earns attention and then converts it. Measured, not guessed.",
-      tag: "Performance, Content strategy",
+      label: "INTELLIGENCE",
+      title: "AI-DRIVEN APPS",
+      description:
+        "Intelligent solutions leveraging machine learning to automate processes and enhance user experiences.",
+      tag: "AI Solutions, Machine Learning",
     },
-    creative: {
+    design: {
       id: "04",
-      label: "EXPRESSING",
-      title: "CREATIVE",
-      description: "3D, video production, motion and sound design. The assets that make the rest of the work land.",
-      tag: "Motion & 3D, Sound design",
+      label: "DESIGN",
+      title: "GRAPHIC DESIGNING",
+      description:
+        "Visual storytelling that resonates. From branding to UI/UX, we design for impact and clarity.",
+      tag: "Branding, UI/UX Design",
+    },
+    video: {
+      id: "05",
+      label: "MEDIA",
+      title: "VIDEO EDITING",
+      description:
+        "Cinematic video production and editing that captures attention and tells your story beautifully.",
+      tag: "Video Production, Motion",
     },
   },
 };
 
 export const workContent = {
   projects: [
-    { id: 1, title: "Zuus x Shake Shaq", subtitle: "Cold-pressed juice x milkshake collab campaign", category: "Campaign", image: "/images/zuus-shakeshaq-campaign.png" },
-    { id: 2, title: "Serena Moon", subtitle: "Private digital exhibition & membership site", category: "Digital", image: "/images/serena-moon-website.png" },
-    { id: 3, title: "Arbitrary", subtitle: "Music platform — records, events, artists", category: "Digital", image: "/images/arbitrary-website.png" },
-    { id: 4, title: "Zuus x Shake Shaq", subtitle: "Cold-pressed juice x milkshake collab campaign", category: "Campaign", image: "/images/zuus-shakeshaq-campaign.png" },
-    { id: 5, title: "Serena Moon", subtitle: "Private digital exhibition & membership site", category: "Digital", image: "/images/serena-moon-website.png" },
+    {
+      id: 1,
+      title: "NCSC Public App",
+      subtitle: "React • Frontend",
+      category: "Web Dev",
+      image: "/images/work/ncsc_frontend.png",
+    },
+    {
+      id: 2,
+      title: "Noor Digital Marketing",
+      subtitle: "SEO • Marketing",
+      category: "Marketing",
+      image: "/images/work/noor.jpg",
+    },
+    {
+      id: 3,
+      title: "Byterack Aerolutiom Inc",
+      subtitle: "Automation • Cloud",
+      category: "Software Dev",
+      image: "/images/work/byterack.png",
+    },
+    {
+      id: 4,
+      title: "Nexus AI Platform",
+      subtitle: "AI App • UI/UX",
+      category: "AI App",
+      image: "/images/work/nexusai.png",
+    },
+    {
+      id: 5,
+      title: "NCSC POS System",
+      subtitle: "POS • Full-Stack",
+      category: "Software Dev",
+      image: "https://picsum.photos/seed/ncfc-posh/800/600",
+    },
+    {
+      id: 6,
+      title: "Commscope Architect Design",
+      subtitle: "Architecture • UI/UX",
+      category: "Design",
+      image: "https://picsum.photos/seed/cummscope/800/600",
+    },
   ],
 };
 
@@ -80,135 +123,126 @@ export const processContent = {
   steps: [
     {
       id: "01",
-      title: "Brief",
-      description: "A call, a scope, a number. We tell you on the first call whether we are the right studio for it.",
+      title: "Discovery",
+      description:
+        "We align on your business goals, technical requirements, and timeline to map out the right digital ecosystem.",
     },
-    { id: "02", title: "Plan", description: "Structure, references and a budget you sign off before anyone opens a file." },
+    {
+      id: "02",
+      title: "Architecture",
+      description:
+        "Seamless integration planning, UI/UX systems, and scalable stack selection before a single line of code is written.",
+    },
     {
       id: "03",
-      title: "Make",
-      description: "Design, build, shoot, edit. One team, in house, with weekly review builds you can click.",
+      title: "Build",
+      description:
+        "Dedicated teams across web, AI, marketing, and creative media shipping weekly milestones with transparent progress.",
     },
-    { id: "04", title: "Launch", description: "Ship it, measure it, keep it running. Handover docs included, retainer optional." },
+    {
+      id: "04",
+      title: "Scale",
+      description:
+        "Launch with 99.9% uptime standards, continuous optimization, and long-term partnership support as your business grows.",
+    },
   ],
 };
 
 export const peopleContent = {
-  team: [
-    {
-      name: "Aabhiskar KC",
-      role: "CEO",
-      description: "Runs the studio and sits on every brief. If the scope changes, he is the one who tells you.",
-    },
-    {
-      name: "Yashmine Gurung",
-      role: "Creative Lead",
-      description: "Holds the art direction across brand, campaign and film so the work looks like one studio made it.",
-    },
-    {
-      name: "Nisika Shrestha",
-      role: "People & Operations",
-      description: "Hiring, onboarding and the reason projects have the right people on them in the right week.",
-    },
-    {
-      name: "Nikhil Tuladhar",
-      role: "Engineering",
-      description: "Builds and maintains what we ship. Infrastructure, performance and the parts nobody sees.",
-    },
-  ],
+  team: [],
 };
 
 export const testimonialsContent = [
   {
     quote:
-      "They rebuilt the site and the brand in the same pass, so nothing felt bolted on. First month after launch, enquiries doubled.",
-    authorName: "Kiran Gurung",
-    authorRole: "Founder, Vertex",
-    theme: "light" as const,
-  },
-  {
-    quote: "The build is stable and the handover was clean. Our own team picked it up in a week without a single call.",
-    authorName: "Sushma Bhandari",
-    authorRole: "Product Lead, Kinetic",
+      "Dits and Dots serves as our extended engineering team — their seamless integration and dedicated support helped us launch on schedule.",
+    authorName: "NCSC Team",
+    authorRole: "Public App & POS System",
     theme: "light" as const,
   },
   {
     quote:
-      "We came for a video and left with a whole system: identity, site, launch campaign. One team, one invoice, one standard.",
-    authorName: "Daniel Reyes",
-    authorRole: "CMO, Apex",
+      "Their data-driven SEO and digital marketing strategy amplified our brand presence and delivered measurable ROI across every channel.",
+    authorName: "Noor Leadership",
+    authorRole: "Digital Marketing Partner",
     theme: "light" as const,
   },
   {
-    quote: "Timelines held. That is rarer than it should be, and it is why we are on the third project with them.",
-    authorName: "Priya Adhikari",
-    authorRole: "Director, Spectrum",
-    theme: "dark" as const,
+    quote:
+      "From cloud automation to UI/UX, they don't just deliver code — they build comprehensive digital ecosystems that evolve with our business.",
+    authorName: "Byterack Aerolutiom Inc",
+    authorRole: "Automation & Cloud",
+    theme: "light" as const,
+  },
+  {
+    quote:
+      "Combining AI-driven workflows with sharp product design, the Nexus AI Platform launch exceeded every performance benchmark.",
+    authorName: "Nexus AI",
+    authorRole: "AI Platform & UI/UX",
+    theme: "light" as const,
   },
 ];
 
 export const careersContent = {
   badge: "CAREERS",
   title: "We are hiring",
-  description: "Send the project you are proudest of. If it is good we will find a seat for you, listed role or not.",
+  description:
+    "Send the project you are proudest of. If it is good we will find a seat for you, listed role or not.",
   roles: [
-    { title: "Frontend Engineer", location: "Lalitpur", type: "Full-time" },
-    { title: "Motion Designer", location: "Hybrid", type: "Full-time" },
-    { title: "Growth Strategist", location: "Dallas", type: "Contract" },
+    { title: "Full-Stack Web Engineer", location: "The Colony, TX / Remote", type: "Full-time" },
+    { title: "AI Solutions Engineer", location: "Remote", type: "Full-time" },
+    { title: "Digital Marketing Strategist", location: "Remote", type: "Contract" },
   ],
 };
 
-export const hiringTeamContent = [
-  { name: "Nisika Shrestha", role: "People & Operations", description: "Reads every application herself. Send work, not a cover letter." },
-  { name: "Aabhiskar KC", role: "CEO", description: "Takes the second interview. Expect questions about how you decide, not what you know." },
-];
+export const hiringTeamContent: { name: string; role: string; description?: string }[] = [];
 
 export const faqContent = {
   questions: [
     {
-      question: "What does Abstrakt actually do?",
+      question: "What does Dits and Dots actually do?",
       answer:
-        "Web platforms and interface systems, brand identity, campaigns and content, plus 3D, video and sound. Most clients start with one and end up using three.",
+        "We are an end-to-end partner for Web Development, AI-Driven Apps, Digital Marketing, Graphic Designing, and Video Editing — building complete digital ecosystems.",
     },
     {
-      question: "How long does a project take?",
+      question: "How does your B2B partnership model work?",
       answer:
-        "A site or identity runs four to eight weeks. Larger platforms and multi-market campaigns run twelve or more. You get the phase dates before we start, not after.",
+        "Dits and Dots serves as your extended team, providing seamless integration, dedicated teams, and long-term reliability so your technology stack stays ahead of the curve.",
     },
     {
-      question: "Do you work with clients outside Nepal?",
-      answer: "Yes. We run from Lalitpur and Dallas, which covers US, European and South Asian hours between the two desks.",
+      question: "Where are you located and do you work globally?",
+      answer:
+        "We are based at 3620 Adelaide, The Colony, TX 75056, and partner with global brands across time zones.",
     },
     {
-      question: "How do you price?",
-      answer: "Flat project fee or a monthly retainer. Either way the number is fixed at scoping and includes everything listed there.",
+      question: "How do we start a project?",
+      answer:
+        "Reach out via the contact form, email hello@ditsanddots.com, or call +1 (817) 330-9194 to discuss your goals and scope.",
     },
   ],
 };
 
 export const contactContent = {
-  headlineLine1: "Let's make",
-  headlineLine2: "the thing.",
-  description: "Tell us what you are trying to launch and roughly when. You will get a scope and a number, not a deck.",
-  email: "abstraktcreation@gmail.com",
-  phone: "+977 9823901866",
+  headlineLine1: "Let's Build Something",
+  headlineLine2: "Extraordinary.",
+  description:
+    "Ready to elevate your digital presence? Reach out to us today and let's discuss how we can help your business grow.",
+  email: "hello@ditsanddots.com",
+  phone: "+1 (817) 330-9194",
   skills: [
-    { label: "React", accent: true },
-    { label: "Next.js", accent: false },
-    { label: "Web Solutions", accent: true },
-    { label: "API Integration", accent: true },
-    { label: "Dashboards", accent: false },
-    { label: "3D & Animation", accent: false },
-    { label: "Social Media", accent: true },
-    { label: "Music Production", accent: true },
-    { label: "Video Production", accent: false },
-    { label: "Graphic Design", accent: true },
+    { label: "Web Development", accent: true },
+    { label: "AI-Driven Apps", accent: false },
+    { label: "Digital Marketing", accent: true },
+    { label: "Graphic Designing", accent: true },
+    { label: "Video Editing", accent: false },
+    { label: "React", accent: false },
+    { label: "Next.js", accent: true },
+    { label: "Full-Stack", accent: true },
+    { label: "Cloud & Automation", accent: false },
+    { label: "SEO & Growth", accent: true },
     { label: "UI/UX Design", accent: true },
-    { label: "System Architecture", accent: false },
-    { label: "Digital Marketing", accent: false },
-    { label: "Creative", accent: false },
-    { label: "Motion Design", accent: true },
-    { label: "Brand Systems", accent: false },
+    { label: "POS Systems", accent: false },
+    { label: "Machine Learning", accent: false },
+    { label: "Brand Systems", accent: true },
   ],
 };
-

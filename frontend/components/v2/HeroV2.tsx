@@ -32,11 +32,11 @@ interface HeroV2Props {
 
 /** Fallback copy, previously PositionV2's own default. */
 const DEFAULT_STATEMENT =
-  "We build the digital side of a business and the creative work around it. The site, the identity, the campaign, the content. One team, in house.";
+  "Your end-to-end partner for Web Development, AI Solutions, and Creative Media. We build the future, one dot at a time.";
 
 // Hero title typewriter cycle: the brand stamps first, then the three
 // verbs escalate. Timings ported from the previous site's hero.
-const TYPEWRITER_WORDS = ["ABSTRAKT", "DESIGN", "BUILD", "GROW"];
+const TYPEWRITER_WORDS = ["DITSNDOTS", "DESIGN", "BUILD", "GROW"];
 const TYPE_MS = 120;
 const HOLD_MS = 2200;
 const DELETE_MS = 60;
@@ -55,7 +55,7 @@ const DELETE_MS = 60;
 // Local hero art from /public/images/hero. Same slot order as above:
 // `three` is the backmost plate, `one` is the foreground.
 const LAYER_IMAGES = {
-  three: "/images/hero/layer3.1.png",
+  three: "/images/hero/layer3.1.jpg",
   two: "/images/hero/layer2.2.png",
   one: "/images/hero/layer1.1.png",
 };
@@ -148,8 +148,8 @@ export default function HeroV2({ statement }: HeroV2Props) {
   }, []);
 
   return (
-    <div className="parallax" ref={rootRef} data-screen-label="Hero" data-nav-tone="dark">
-      <section className="parallax__header">
+    <div className="parallax" ref={rootRef} data-screen-label="Hero">
+      <section className="parallax__header" data-nav-tone="light">
         <div className="parallax__visuals">
           <div className="parallax__black-line-overflow" />
           <div data-parallax-layers className="parallax__layers">
@@ -173,7 +173,17 @@ export default function HeroV2({ statement }: HeroV2Props) {
             />
             <div data-parallax-layer="3" className="parallax__layer-title">
               <h2 className="parallax__title" style={{ color: "#ffffff" }}>
-                {typed || "\u200b"}
+                {typed
+                  ? typed.startsWith("DITSN")
+                    ? (
+                      <>
+                        {typed.slice(0, 4)}
+                        <span style={{ color: "#0082C8" }}>N</span>
+                        {typed.slice(5)}
+                      </>
+                    )
+                    : typed
+                  : "\u200b"}
                 {!reducedMotion && <span className="parallax__cursor" aria-hidden="true" />}
               </h2>
             </div>
@@ -200,14 +210,17 @@ export default function HeroV2({ statement }: HeroV2Props) {
           reads; that hook queries by attribute, so it keeps driving this
           without knowing the markup moved. */}
       <section
+        id="about"
         className="parallax__content"
+        data-position-sheet="1"
         data-reveal-sec="1"
         data-screen-label="Position"
+        data-nav-tone="light"
       >
         <div className="parallax__statement-sticky">
-          <p className="parallax__statement">
+          <p className="parallax__statement" data-position-text="1">
             {words.map((w, i) => (
-              <span key={i} data-rw="1" style={{ opacity: 0.26 }}>
+              <span key={i} data-rw="1" style={{ opacity: 0.2 }}>
                 {w}{" "}
               </span>
             ))}

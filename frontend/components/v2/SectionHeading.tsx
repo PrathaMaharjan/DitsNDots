@@ -33,7 +33,7 @@ export default function SectionHeading({ children, accent = 1, tone = "light" }:
   return (
     <>
       {head}{" "}
-      <span style={{ color: tone === "dark" ? BRAND_LIGHT : BRAND }}>{tail}</span>
+      <span style={{ color: tone === "dark" ? "#0B111A" : "#0082C8" }}>{tail}</span>
     </>
   );
 }

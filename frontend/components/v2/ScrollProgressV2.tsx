@@ -62,7 +62,7 @@ export default function ScrollProgressV2() {
         style={{
           height: "100%",
           width: "100%",
-          background: BRAND_LIGHT,
+          background: "#0082C8",
           transform: "scaleX(0)",
           transformOrigin: "left center",
           willChange: "transform",

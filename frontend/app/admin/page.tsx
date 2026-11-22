@@ -5,7 +5,6 @@ import Button from "../../components/ui/Button";
 import { AdminSkeleton } from "../../components/ui/Skeleton";
 
 // Import modular forms
-import HeroForm from "./HeroForm";
 import PositionForm from "./PositionForm";
 import CapabilitiesForm from "./CapabilitiesForm";
 import WorkForm from "./WorkForm";
@@ -27,7 +26,7 @@ import StatModal from "./StatModal";
 import TestimonialModal from "./TestimonialModal";
 import RoleModal from "./RoleModal";
 
-type Tab = "hero" | "logos" | "position" | "capabilities" | "work" | "stats" | "process" | "people" | "testimonials" | "careers" | "faq" | "contact";
+type Tab = "logos" | "position" | "capabilities" | "work" | "stats" | "process" | "people" | "testimonials" | "careers" | "faq" | "contact";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -35,7 +34,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+  const [activeTab, setActiveTab] = useState<Tab>("position");
   
   // Site data state
   const [content, setContent] = useState<any>(null);
@@ -163,6 +162,11 @@ export default function AdminPage() {
           }
         }
 
+        try {
+          sessionStorage.removeItem("ditsndots_content");
+          sessionStorage.removeItem("abstrakt_content");
+        } catch (e) {}
+
         setSaveStatus({
           message: `Saved changes to '${sectionId.toUpperCase()}' successfully.`,
           type: "success",
@@ -208,6 +212,10 @@ export default function AdminPage() {
 
       const responseData = await res.json();
       if (res.ok) {
+        try {
+          sessionStorage.removeItem("ditsndots_content");
+          sessionStorage.removeItem("abstrakt_content");
+        } catch (e) {}
         setSaveStatus({
           message: "All database content successfully cleared. Ready for your manual input!",
           type: "success",
@@ -244,7 +252,7 @@ export default function AdminPage() {
         <header className="w-full border-b border-neutral-200/50 py-5 px-6 md:px-12 bg-white sticky top-0 z-40 shadow-sm">
           <div className="max-w-[1400px] mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-lg font-black tracking-tight text-foreground">ABSTRAKT</span>
+              <span className="text-lg font-black tracking-tight text-foreground">DITSNDOTS</span>
               <span className="text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase">
                 CONTROL PANEL
               </span>
@@ -263,7 +271,7 @@ export default function AdminPage() {
         <div className="w-full max-w-md bg-white border border-neutral-200 shadow-xl rounded-2xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-black tracking-tight text-neutral-900 uppercase">
-              ABSTRAKT CONTROL
+              DITSNDOTS CONTROL
             </h1>
             <p className="text-xs text-neutral-400 font-mono tracking-widest uppercase mt-2">
               ADMINISTRATIVE CONTROL PANEL
@@ -307,20 +315,36 @@ export default function AdminPage() {
       <header className="w-full border-b border-neutral-200/50 py-5 px-6 md:px-12 bg-white sticky top-0 z-40 shadow-sm">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo.png"
+              alt="Dits N Dots logo"
+              className="w-8 h-8 object-contain"
+            />
             <a href="/" className="text-lg font-black tracking-tight text-foreground">
-              ABSTRAKT
+              DITS<span className="text-[#0082C8]">N</span>DOTS
             </a>
             <span className="text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase">
               CONTROL PANEL
             </span>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="text-[13px] font-semibold text-neutral-450 hover:text-red-500 transition-colors uppercase"
-          >
-            Logout &rarr;
-          </button>
+          <div className="flex items-center gap-5">
+            <a
+              href="/work"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-mono font-bold text-[#0082C8] hover:underline uppercase"
+            >
+              View /work Page &#8599;
+            </a>
+            <button
+              onClick={handleLogout}
+              className="text-[13px] font-semibold text-neutral-500 hover:text-red-500 transition-colors uppercase cursor-pointer"
+            >
+              Logout &rarr;
+            </button>
+          </div>
         </div>
       </header>
 
@@ -331,7 +355,7 @@ export default function AdminPage() {
           <span className="text-[10px] font-mono font-bold tracking-[0.2em] text-neutral-400 uppercase p-2 block border-b border-neutral-100 mb-2">
             SECTIONS LIST
           </span>
-          {(["hero", "logos", "position", "capabilities", "work", "stats", "process", "people", "testimonials", "careers", "faq", "contact"] as Tab[]).map((tab) => {
+          {(["position", "work", "capabilities", "logos", "stats", "testimonials", "faq", "contact"] as Tab[]).map((tab) => {
             const isActive = activeTab === tab;
             return (
               <button
@@ -351,33 +375,23 @@ export default function AdminPage() {
                 {tab === "position"
                   ? "Statement"
                   : tab === "work"
-                  ? "Selected Work"
+                  ? "Work Page & Projects"
                   : tab === "logos"
-                  ? "Logos"
+                  ? "Trusted By Logos"
                   : tab === "capabilities"
-                  ? "Service"
+                  ? "Our Services"
                   : tab === "stats"
-                  ? "Stats"
+                  ? "Key Stats"
                   : tab === "testimonials"
-                  ? "Testimonials"
-                  : tab === "careers"
-                  ? "Careers"
+                  ? "Rating & Reviews"
+                  : tab === "faq"
+                  ? "Asked Often (FAQ)"
                   : tab === "contact"
-                  ? "Contact"
+                  ? "Let's Build (Contact)"
                   : tab}
               </button>
             );
           })}
-
-          <div className="border-t border-neutral-100 mt-4 pt-4">
-            <button
-              onClick={handleClearAllData}
-              disabled={isClearing}
-              className="w-full text-left px-4 py-3 rounded-lg text-sm font-bold text-red-500 hover:bg-red-50 hover:text-red-600 transition-all uppercase cursor-pointer disabled:opacity-50"
-            >
-              {isClearing ? "Clearing Data..." : "Clear All Data"}
-            </button>
-          </div>
         </aside>
 
         {/* Tab Workspace Form Area */}
@@ -390,17 +404,19 @@ export default function AdminPage() {
                 EDIT {activeTab === "position"
                   ? "Brand Statement"
                   : activeTab === "work"
-                  ? "Selected Work"
+                  ? "Work Page & Individual Projects"
                   : activeTab === "capabilities"
-                  ? "Service"
+                  ? "Our Services"
+                  : activeTab === "logos"
+                  ? "Trusted By Logos"
                   : activeTab === "stats"
                   ? "Key Metrics"
                   : activeTab === "testimonials"
                   ? "Ratings & Reviews"
-                  : activeTab === "careers"
-                  ? "Careers & Roles"
+                  : activeTab === "faq"
+                  ? "Asked Often (FAQ)"
                   : activeTab === "contact"
-                  ? "Contact Details"
+                  ? "Let's Build Section"
                   : activeTab}
               </h2>
               <p className="text-xs text-neutral-400 mt-1 font-mono uppercase tracking-wider">
@@ -517,10 +533,6 @@ export default function AdminPage() {
           )}
 
           {/* TAB CONTENTS */}
-          {activeTab === "hero" && content?.hero && (
-            <HeroForm data={content.hero} onChange={(newData) => updateSectionData("hero", newData)} disabled={!isEditing} />
-          )}
-
           {activeTab === "position" && content?.position && (
             <PositionForm data={content.position} onChange={(newData) => updateSectionData("position", newData)} disabled={!isEditing} />
           )}
@@ -699,7 +711,7 @@ export default function AdminPage() {
                 ...prev.faq,
                 badge: "GOT QUESTIONS?",
                 title: "FREQUENTLY ASKED QUESTIONS",
-                description: "Find answers to the most common questions about Abstrakt Creation and our comprehensive digital, creative, and branding services.",
+                description: "Find answers to the most common questions about Dits and Dots Agency and our web, AI, marketing, and creative media services.",
                 buttonText: "VIEW ALL FAQS +",
                 questions: list,
               },

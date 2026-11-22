@@ -20,7 +20,7 @@ interface CareersV2Props {
   hiringTeam?: HiringMember[];
 }
 
-const MARQUEE_ITEMS = ["OPEN ROLES", "SEND YOUR BEST WORK", "LALITPUR & DALLAS"];
+const MARQUEE_ITEMS = ["OPEN ROLES", "SEND YOUR BEST WORK", "THE COLONY, TX"];
 
 export default function CareersV2({ data, hiringTeam = [] }: CareersV2Props) {
   const roles = data?.roles || [];

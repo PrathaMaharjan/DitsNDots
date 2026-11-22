@@ -116,7 +116,7 @@ export default function TestimonialsForm({ data, onChange, onStartEditing, disab
 
             return (
               <div
-                key={item.id ?? idx}
+                key={`${item.id ?? "new"}-${idx}`}
                 draggable={!disabled}
                 onDragStart={(e) => handleDragStart(e, idx)}
                 onDragOver={(e) => handleDragOver(e, idx)}
@@ -147,11 +147,6 @@ export default function TestimonialsForm({ data, onChange, onStartEditing, disab
                           ({item.authorRole})
                         </span>
                       )}
-                      <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded uppercase ${
-                        item.theme === "dark" ? "bg-neutral-900 text-white" : "bg-neutral-100 text-neutral-600"
-                      }`}>
-                        {item.theme || "light"}
-                      </span>
                     </div>
                     <p className="text-xs text-neutral-600 line-clamp-2 italic font-sans">
                       &ldquo;{item.quote}&rdquo;

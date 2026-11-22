@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
 import { BRAND_LIGHT, INK, displayFont, bodyFont } from "./tokens";
 import SectionHeading from "./SectionHeading";
+import { getProjectSlug } from "../../lib/v2/workProjects";
 
 interface ProjectData {
   id?: string | number;
@@ -67,25 +69,20 @@ const BG_IS_DARK = true;
 
 const T = BG_IS_DARK
   ? {
-      // Matched to the artwork's wall rather than pure ink, so any crop or
-      // overscan edge blends instead of banding against the photograph.
-      field: "#2A2621",
-      eyebrow: BRAND_LIGHT,
-      heading: "#F7F6F3",
-      body: "rgba(247,246,243,.72)",
-      // Brand pool behind the ring, then a vertical scrim that darkens the
-      // top for the heading and the floor for the band — the middle stays
-      // open so the wall texture, leaf shadows and frames still read.
-      wash: "radial-gradient(120% 80% at 50% 46%, rgba(232, 70, 16,.20) 0%, rgba(232, 70, 16,.05) 40%, rgba(14,14,14,0) 72%), linear-gradient(180deg, rgba(11,10,9,.72) 0%, rgba(11,10,9,.30) 30%, rgba(11,10,9,.22) 58%, rgba(11,10,9,.62) 100%)",
-      cardShadow: "0 20px 48px rgba(0,0,0,0.58), 0 0 0 1px rgba(247,246,243,0.16)",
-      cardHoverShadow: `0 34px 74px rgba(0,0,0,0.62), 0 0 0 1px ${BRAND_LIGHT}`,
-      panelBg: "rgba(18,16,20,0.72)",
-      panelBorder: "1px solid rgba(247,246,243,0.16)",
-      panelShadow: "0 24px 60px rgba(0,0,0,0.5)",
-      panelName: "#F7F6F3",
-      panelMeta: "rgba(247,246,243,0.58)",
-      btnBg: "#F7F6F3",
-      btnInk: INK,
+      field: "#02AA7A",
+      eyebrow: "#0B111A",
+      heading: "#FFFFFF",
+      body: "rgba(255, 255, 255, 0.92)",
+      wash: "radial-gradient(120% 80% at 50% 46%, rgba(255, 255, 255, 0.12) 0%, rgba(2, 170, 122, 0) 72%)",
+      cardShadow: "0 20px 48px rgba(0, 38, 26, 0.36), 0 0 0 1px rgba(247,246,243,0.18)",
+      cardHoverShadow: `0 34px 74px rgba(0, 38, 26, 0.48), 0 0 0 2px #FFFFFF`,
+      panelBg: "rgba(255, 255, 255, 0.96)",
+      panelBorder: "1px solid rgba(11, 17, 26, 0.08)",
+      panelShadow: "0 22px 54px rgba(0, 38, 26, 0.28)",
+      panelName: "#0B111A",
+      panelMeta: "#02AA7A",
+      btnBg: "#0B111A",
+      btnInk: "#FFFFFF",
       navTone: "dark",
     }
   : {
@@ -117,6 +114,7 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
   const metaRef = useRef<HTMLDivElement | null>(null);
 
   const angle = useRef(0);
+  const manualOffset = useRef(0);
   /** Target spin rate as a fraction of full speed: 1 running, 0 parked.
    *  `spin` eases toward it each frame rather than snapping, so hovering a
    *  card slows the ring to a stop over ~250ms and leaving it ramps back —
@@ -235,6 +233,11 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
         angle.current =
           (angle.current + (dt / period) * 360 * spin.current + 360) % 360;
       }
+      if (Math.abs(manualOffset.current) > 0.05) {
+        const step = manualOffset.current * (1 - Math.pow(0.5, dt / 80));
+        angle.current = (angle.current + step + 3600) % 360;
+        manualOffset.current -= step;
+      }
       paint();
       raf.current = requestAnimationFrame(tick);
     };
@@ -309,7 +312,7 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
   }, [cancelClose, closeNow]);
 
   const cardIn = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
+    (e: React.MouseEvent<HTMLElement>) => {
       cancelClose();
       const c = e.currentTarget;
       // Moving straight from one card to another: drop the previous card's
@@ -349,10 +352,12 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
   return (
     <section
       id="works"
+      data-reveal="1"
       data-screen-label="Our works"
       data-nav-tone={T.navTone}
       style={{
         position: "relative",
+        zIndex: 1,
         width: "100%",
         minHeight: `calc(100svh * ${SECTION_SCALE})`,
         overflow: "hidden",
@@ -362,30 +367,15 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
         flexDirection: "column",
       }}
     >
-      {/* Backdrop art, full-bleed and bottom-anchored — the plinth and torn
-          paper edge stay planted at the section floor while the wall's open
-          upper area takes the crop on shorter viewports. */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage: `url("${BG_SRC}")`,
-          backgroundSize: "cover",
-          backgroundPosition: "center bottom",
-          backgroundRepeat: "no-repeat",
-        }}
-      />
-
-      {/* Wash over the art: settles it back so the cards and copy stay the
-          subject, and keeps the top of the section clean for the heading. */}
+      {/* Wash over the ground */}
       <div aria-hidden style={{ position: "absolute", inset: 0, background: T.wash }} />
 
       <div
+        data-works-head="1"
         style={{
           position: "relative",
           zIndex: 3,
-          flex: "1 1 auto",
+          flex: "0 0 auto",
           minHeight: 0,
           display: "flex",
           flexDirection: "column",
@@ -393,9 +383,10 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
           justifyContent: "center",
           width: "min(680px, calc(100% - 64px))",
           margin: "0 auto",
-          padding: "clamp(96px,14vh,150px) 0 6px",
+          padding: "clamp(230px, 28vh, 320px) 0 0",
           boxSizing: "border-box",
           textAlign: "center",
+          willChange: "transform, filter",
         }}
       >
         <h2
@@ -410,10 +401,16 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
             color: T.heading,
           }}
         >
-          <SectionHeading tone={BG_IS_DARK ? "dark" : "light"}>Our Works</SectionHeading>
+          <span data-rv="line">
+            <span>
+              <SectionHeading tone={BG_IS_DARK ? "dark" : "light"}>Our Works</SectionHeading>
+            </span>
+          </span>
         </h2>
         <p
+          data-rv="up"
           style={{
+            ["--rv-i" as string]: 2,
             margin: "18px auto 0",
             maxWidth: 440,
             fontSize: "clamp(14px,1.1vw,16px)",
@@ -422,23 +419,16 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
             textWrap: "pretty",
           }}
         >
-          Campaigns, platforms and brand systems — built end to end, in one studio.
+          Explore our curated portfolio of digital transformations, engineered with precision and creative flair.
         </p>
       </div>
 
       {/* The band clips the ring; the stage inside is scaled to fit by fit(). */}
       <div
         ref={bandRef}
-        // Entering the band does NOT pause: the band is a full-width strip of
-        // mostly empty backdrop, and stopping the ring the moment the pointer
-        // crosses it reads as the carousel dying on approach. Only a card
-        // (cardIn) or the panel pauses.
-        //
-        // Not an immediate resume: the panel can sit outside the band, so
-        // leaving here may just mean the pointer is on its way to the button.
-        // closeNow() is what finally unpauses, once the grace period lapses.
+        data-rv="scale"
         onMouseLeave={scheduleClose}
-        style={{ position: "relative", flex: "0 0 auto", width: "100%", height: 342, zIndex: 2, overflow: "hidden" }}
+        style={{ ["--rv-i" as string]: 3, position: "relative", flex: "0 0 auto", marginTop: -36, width: "100%", height: 342, zIndex: 2, overflow: "hidden" }}
       >
         <div
           ref={stageRef}
@@ -458,12 +448,19 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
             <div ref={ringRef} style={{ position: "absolute", left: 0, top: 0, width: 0, height: 0, transformStyle: "preserve-3d" }}>
               {slots.map((project, i) => {
                 const a = ((360 / SLOTS) * i).toFixed(3);
+                const slug = getProjectSlug(project, i);
                 return (
-                  <div
+                  <Link
                     key={i}
+                    href={`/work/${slug}`}
+                    onClick={() => {
+                      try {
+                        sessionStorage.setItem("ditsndots_work_back", "/");
+                      } catch {}
+                    }}
                     data-a={a}
-                    data-name={project.client || project.title}
-                    data-meta={[project.category, project.subtitle].filter(Boolean).join(" · ")}
+                    data-name={project.title || project.client}
+                    data-meta={project.subtitle || project.category || ""}
                     onMouseEnter={cardIn}
                     onMouseLeave={cardOut}
                     style={{
@@ -475,6 +472,9 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
                       transform: `rotateY(${a}deg) translateZ(-${RADIUS}px)`,
                       backfaceVisibility: "hidden",
                       cursor: "pointer",
+                      textDecoration: "none",
+                      color: "inherit",
+                      display: "block",
                     }}
                   >
                     <div
@@ -508,86 +508,177 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
                         style={{
                           position: "absolute",
                           inset: 0,
-                          background: "linear-gradient(180deg, rgba(11,10,9,0) 40%, rgba(11,10,9,0.5) 100%)",
+                          background:
+                            "linear-gradient(180deg, rgba(11,17,26,0) 36%, rgba(11,17,26,0.68) 72%, rgba(11,17,26,0.92) 100%)",
                           opacity: "var(--ov, 0)",
-                          transition: "opacity 0.5s ease",
+                          transition: "opacity 0.4s cubic-bezier(.22,1,.36,1)",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "flex-end",
+                          padding: "22px 22px",
+                          pointerEvents: "none",
                         }}
-                      />
+                      >
+                        {(project.subtitle || project.category) && (
+                          <span
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 700,
+                              letterSpacing: ".14em",
+                              textTransform: "uppercase",
+                              color: "#02AA7A",
+                              marginBottom: 6,
+                            }}
+                          >
+                            {project.subtitle || project.category}
+                          </span>
+                        )}
+                        <span
+                          style={{
+                            fontFamily: displayFont,
+                            fontWeight: 700,
+                            fontSize: 22,
+                            lineHeight: 1.18,
+                            letterSpacing: "-.02em",
+                            color: "#FFFFFF",
+                          }}
+                        >
+                          {project.title}
+                        </span>
+                      </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Glass info panel — parked beside whichever card is hovered. It is
-            hoverable in its own right: entering it cancels the pending close,
-            so the pointer can leave the card and reach the button. */}
-        <div
-          ref={panelRef}
-          onMouseEnter={cancelClose}
-          onMouseLeave={scheduleClose}
+      {/* Bottom Bar: Prev Arrow on Far Left | Explore More in Center | Next Arrow on Far Right */}
+      <div
+        data-rv="up"
+        style={{
+          ["--rv-i" as string]: 4,
+          position: "relative",
+          zIndex: 4,
+          width: "100%",
+          maxWidth: 1520,
+          margin: "-84px auto 36px",
+          padding: "0 clamp(24px, 4vw, 64px)",
+          boxSizing: "border-box",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+        }}
+      >
+        {/* Far Left: Bare Previous Arrow */}
+        <button
+          type="button"
+          aria-label="Previous project card"
+          onClick={() => {
+            manualOffset.current -= 360 / SLOTS;
+          }}
           style={{
-            position: "absolute",
-            left: "var(--px, 0px)",
-            top: "var(--py, 0px)",
-            zIndex: 7,
-            width: 268,
-            padding: "18px 20px 20px",
-            boxSizing: "border-box",
-            borderRadius: 14,
-            background: T.panelBg,
-            border: T.panelBorder,
-            backdropFilter: "blur(22px) saturate(1.3)",
-            WebkitBackdropFilter: "blur(22px) saturate(1.3)",
-            boxShadow: T.panelShadow,
-            opacity: "var(--po, 0)",
-            transform: "translate(-50%, var(--pty, 12px))",
-            transition:
-              "opacity 0.38s ease, transform 0.5s cubic-bezier(.22,1,.36,1), left 0.5s cubic-bezier(.22,1,.36,1), top 0.5s cubic-bezier(.22,1,.36,1)",
-            // Toggled to "auto" while a card is hovered; hidden panels must not
-            // swallow pointer events over the ring behind them.
-            pointerEvents: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 8,
+            border: "none",
+            background: "transparent",
+            color: "#FFFFFF",
+            cursor: "pointer",
+            transition: "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease",
+            opacity: 0.88,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateX(-4px)";
+            e.currentTarget.style.opacity = "1";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateX(0)";
+            e.currentTarget.style.opacity = "0.88";
           }}
         >
-          <div ref={nameRef} style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 20, lineHeight: 1.2, letterSpacing: "-.01em", color: T.panelName }} />
-          <div ref={metaRef} style={{ marginTop: 7, fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase", color: T.panelMeta }} />
-          <a
-            className="ab-btn ab-btn--invert"
-            href="#contact"
-            style={{
-              marginTop: 16,
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 9,
-              padding: "11px 18px",
-              borderRadius: 999,
-              // Handed to the stylesheet as custom properties rather than as
-              // `background`/`color` directly: an inline colour outranks
-              // .ab-btn--invert:hover, which would pin the label to its
-              // resting ink and leave it unreadable once the brand fill wipes
-              // across. The variant reads these for the resting state and is
-              // then free to override the hover.
-              ["--btn-rest-bg" as string]: T.btnBg,
-              ["--btn-rest-ink" as string]: T.btnInk,
-              fontSize: 13,
-              fontWeight: 600,
-              letterSpacing: ".01em",
-              textDecoration: "none",
-              cursor: "pointer",
-            }}
-          >
-            <span>View Project</span>
-            {/* `currentColor`, not T.btnInk: the hover inverts the label's
-                colour, and a hardcoded stroke would leave the arrow in the
-                old ink while the text beside it flipped. */}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M5 12h13" />
-              <path d="M12.5 6.5 19 12l-6.5 5.5" />
-            </svg>
-          </a>
-        </div>
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        {/* Center: Explore More Pill -> links to the full /work page */}
+        <Link
+          href="/work"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 10,
+            height: 46,
+            padding: "0 26px",
+            borderRadius: 999,
+            background: "rgba(11, 17, 26, 0.24)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.34)",
+            color: "#FFFFFF",
+            fontSize: 13.5,
+            fontWeight: 700,
+            letterSpacing: "0.02em",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+            transition: "background 0.28s cubic-bezier(0.22, 1, 0.36, 1), color 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.28s ease",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#FFFFFF";
+            e.currentTarget.style.color = "#0B111A";
+            e.currentTarget.style.borderColor = "#FFFFFF";
+            e.currentTarget.style.transform = "translateY(-2px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(11, 17, 26, 0.24)";
+            e.currentTarget.style.color = "#FFFFFF";
+            e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.34)";
+            e.currentTarget.style.transform = "translateY(0)";
+          }}
+        >
+          <span>Explore More</span>
+          <span aria-hidden="true" style={{ fontSize: 15, lineHeight: 1 }}>&rarr;</span>
+        </Link>
+
+        {/* Far Right: Bare Next Arrow */}
+        <button
+          type="button"
+          aria-label="Next project card"
+          onClick={() => {
+            manualOffset.current += 360 / SLOTS;
+          }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 8,
+            border: "none",
+            background: "transparent",
+            color: "#FFFFFF",
+            cursor: "pointer",
+            transition: "transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease",
+            opacity: 0.88,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateX(4px)";
+            e.currentTarget.style.opacity = "1";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateX(0)";
+            e.currentTarget.style.opacity = "0.88";
+          }}
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M5 12h14" />
+            <path d="M12 5l7 7-7 7" />
+          </svg>
+        </button>
       </div>
     </section>
   );

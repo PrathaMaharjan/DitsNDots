@@ -31,7 +31,7 @@ export default function FaqForm({ data, onChange, onStartEditing, disabled = fal
       ...data,
       badge: "GOT QUESTIONS?",
       title: "FREQUENTLY ASKED QUESTIONS",
-      description: "Find answers to the most common questions about Abstrakt Creation and our comprehensive digital, creative, and branding services.",
+      description: "Find answers to the most common questions about Dits and Dots Agency and our web, AI, marketing, and creative media services.",
       buttonText: "VIEW ALL FAQS +",
       questions,
     });

@@ -66,7 +66,7 @@ export function useSectionReveal(
       // taller than the viewport can have its top scrolled well above the
       // screen while its content still fills it, so the top test is what
       // carries tall sections and the bottom test carries short ones.
-      return r.top < vh * 0.68 && r.bottom > vh * 0.08;
+      return r.top < vh * 0.82 && r.bottom > vh * 0.06;
     };
 
     const io = new IntersectionObserver(
@@ -77,19 +77,7 @@ export function useSectionReveal(
           io.unobserve(entry.target);
         });
       },
-      // Trigger ~32% into the viewport: the section is being read by the
-      // time its entrance plays, rather than finishing while still a sliver
-      // at the screen's bottom edge. Waiting for 50%+ reads as laggy,
-      // because the reader has already taken the section in by then.
-      //
-      // threshold MUST stay 0. A non-zero threshold is a fraction of the
-      // element's own area, so a section taller than the viewport can never
-      // reach it — the work gallery and index are each well over one screen
-      // tall, and at threshold 0.1 they scrolled past without the callback
-      // ever reporting `isIntersecting`, leaving every [data-rv] child stuck
-      // at opacity 0. The gating is `onScreen` above, which measures the
-      // rect against the viewport and does not care how tall the section is.
-      { threshold: 0, rootMargin: "0px 0px -32% 0px" }
+      { threshold: 0, rootMargin: "0px 0px -16% 0px" }
     );
     // A section revealed on a previous run keeps its class and is not
     // re-observed, so a data swap never replays an animation the reader
@@ -98,13 +86,20 @@ export function useSectionReveal(
       if (!s.classList.contains("ab-in")) io.observe(s);
     });
 
-    // --- 2. Depth handoff ----------------------------------------------
+    // --- 2. Depth handoff & Humaan-style parallax curved sheets --------
     const depthSections = Array.from(root.querySelectorAll<HTMLElement>("[data-depth]"));
+    const positionSheet = root.querySelector<HTMLElement>("[data-position-sheet]");
+    const positionText = root.querySelector<HTMLElement>("[data-position-text]");
+    const worksHead = root.querySelector<HTMLElement>("[data-works-head]");
+    const lightSheet = root.querySelector<HTMLElement>("[data-light-sheet]");
+    const capInner = root.querySelector<HTMLElement>("[data-cap-inner]");
+    const footerInner = root.querySelector<HTMLElement>("[data-footer-inner]");
     const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
     let raf: number | null = null;
 
     const tick = () => {
       const vh = window.innerHeight;
+      const vw = window.innerWidth;
 
       // Safety net for the reveals above. Everything [data-rv] defaults to
       // opacity 0, so a missed IntersectionObserver callback does not just
@@ -121,6 +116,81 @@ export function useSectionReveal(
         }
       }
 
+      if (positionSheet) {
+        const pr = positionSheet.getBoundingClientRect();
+        const tBot = clamp((vh * 0.96 - pr.bottom) / (vh * 0.84), 0, 1);
+        const smoothBot = tBot * tBot * (3 - 2 * tBot);
+        const maxInset = Math.min(40, Math.max(14, vw * 0.026));
+        const inset = (maxInset * smoothBot).toFixed(2);
+        const botRadius = (42 + 22 * smoothBot).toFixed(1);
+        positionSheet.style.marginLeft = `${inset}px`;
+        positionSheet.style.marginRight = `${inset}px`;
+        positionSheet.style.borderTopLeftRadius = "0px";
+        positionSheet.style.borderTopRightRadius = "0px";
+        positionSheet.style.borderBottomLeftRadius = `${botRadius}px`;
+        positionSheet.style.borderBottomRightRadius = `${botRadius}px`;
+
+        if (positionText) {
+          const yDrift = (-smoothBot * 52).toFixed(1);
+          const sc = (1 - smoothBot * 0.035).toFixed(4);
+          positionText.style.transform = `translate3d(0,${yDrift}px,0) scale(${sc})`;
+        }
+
+        // Bottom parallax reveal over Our Works as the curved statement sheet lifts off it
+        if (worksHead) {
+          const pUncover = clamp(1 - pr.bottom / (vh * 0.96), 0, 1);
+          const remain = 1 - pUncover;
+          const yHold = (-remain * 165).toFixed(1);
+          const sc = (1 - remain * 0.045).toFixed(4);
+          worksHead.style.transform = `translate3d(0,${yHold}px,0) scale(${sc})`;
+          worksHead.style.filter = "none";
+        }
+      }
+
+      if (lightSheet) {
+        const r = lightSheet.getBoundingClientRect();
+        const flatTop = lightSheet.dataset.lightSheetTop === "flat";
+        // Top entrance: 1 when entering at bottom of screen, 0 once top reaches upper viewport
+        const tTop = flatTop ? 0 : clamp((r.top - vh * 0.06) / (vh * 0.88), 0, 1);
+        // Bottom exit: 0 while bottom is below fold, 1 as bottom lifts up to reveal Footer
+        const tBot = clamp((vh * 0.96 - r.bottom) / (vh * 0.84), 0, 1);
+        const edge = Math.max(tTop, tBot);
+        const smoothEdge = edge * edge * (3 - 2 * edge);
+        const maxInset = Math.min(40, Math.max(14, vw * 0.026));
+        const inset = (maxInset * smoothEdge).toFixed(2);
+        const topRadius = (40 + 22 * (tTop * tTop * (3 - 2 * tTop))).toFixed(1);
+        const botRadius = (40 + 22 * (tBot * tBot * (3 - 2 * tBot))).toFixed(1);
+        lightSheet.style.marginLeft = `${inset}px`;
+        lightSheet.style.marginRight = `${inset}px`;
+        if (!flatTop) {
+          lightSheet.style.borderTopLeftRadius = `${topRadius}px`;
+          lightSheet.style.borderTopRightRadius = `${topRadius}px`;
+        }
+        lightSheet.style.borderBottomLeftRadius = `${botRadius}px`;
+        lightSheet.style.borderBottomRightRadius = `${botRadius}px`;
+
+        // 1. Top parallax over Capabilities: Capabilities lags downward & scales slightly
+        //    as the curved cream card slides up and covers it.
+        if (capInner) {
+          const pCover = clamp(1 - r.top / vh, 0, 1);
+          const yShift = (pCover * 165).toFixed(1);
+          const sc = (1 - pCover * 0.048).toFixed(4);
+          capInner.style.transform = `translate3d(0,${yShift}px,0) scale(${sc})`;
+          capInner.style.filter = "none";
+        }
+
+        // 2. Bottom parallax reveal over Footer: Footer sits shifted up underneath the curved light sheet
+        //    and drifts into place at half-speed as the curved bottom edge lifts off it.
+        if (footerInner) {
+          const pUncover = clamp(1 - (r.bottom - vh * 0.14) / (vh * 0.84), 0, 1);
+          const remain = 1 - pUncover;
+          const yHold = (-remain * 175).toFixed(1);
+          const sc = (1 - remain * 0.045).toFixed(4);
+          footerInner.style.transform = `translate3d(0,${yHold}px,0) scale(${sc})`;
+          footerInner.style.filter = "none";
+        }
+      }
+
       depthSections.forEach((section) => {
         const r = section.getBoundingClientRect();
 
@@ -132,20 +202,11 @@ export function useSectionReveal(
         const radius = 22 * (1 - pIn);
         section.style.borderTopLeftRadius = radius + "px";
         section.style.borderTopRightRadius = radius + "px";
-        // The lift shadow only reads as depth where the incoming section
-        // actually changes ground colour. On a same-colour handoff there is
-        // no edge to imply, so it just smudges the seam — those sections opt
-        // out with data-depth="flat" and keep the radius and drift.
-        if (section.dataset.depth !== "flat") {
-          section.style.boxShadow = `0 -34px 60px -24px rgba(0,0,0,${(0.34 * (1 - pIn)).toFixed(3)})`;
-        }
-
         const inner = section.querySelector<HTMLElement>("[data-depth-inner]");
         if (inner) {
           if (inner.dataset.depthInner !== "dim") {
             inner.style.transform = `translate3d(0,${(-22 * pOut).toFixed(2)}px,0)`;
           }
-          inner.style.filter = `brightness(${(1 - 0.18 * pOut).toFixed(3)})`;
         }
       });
     };

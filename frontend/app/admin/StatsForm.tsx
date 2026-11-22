@@ -116,7 +116,7 @@ export default function StatsForm({ data, onChange, onStartEditing, disabled = f
 
             return (
               <div
-                key={stat.id ?? idx}
+                key={`${stat.id ?? "new"}-${idx}`}
                 draggable={!disabled}
                 onDragStart={(e) => handleDragStart(e, idx)}
                 onDragOver={(e) => handleDragOver(e, idx)}
