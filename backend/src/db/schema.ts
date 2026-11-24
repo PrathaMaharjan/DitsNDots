@@ -179,3 +179,11 @@ export const contactSkills = pgTable("contact_skills", {
     sortOrder: integer("sort_order").notNull().default(0),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// 17. Admin Credentials Table (singleton row id = 1)
+export const adminCredentials = pgTable("admin_credentials", {
+    id: integer("id").primaryKey().default(1),
+    email: varchar("email", { length: 255 }).notNull().default("admin@ditsndots.com"),
+    passwordHash: text("password_hash").notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

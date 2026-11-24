@@ -1,11 +1,13 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import crypto from 'crypto';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 console.log("DATABASE_URL connection string is loaded:", process.env.DATABASE_URL ? "YES" : "NO");
 import express from 'express';
 import cors from 'cors';
 import pg from 'pg';
+import nodemailer from 'nodemailer';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq } from 'drizzle-orm';
 import {
@@ -39,6 +41,67 @@ const poolConfig = {
 
 const pool = new pg.Pool(poolConfig);
 const db = drizzle({ client: pool });
+
+// --- Admin Credential Helpers (scrypt salted hashing) ---
+const DEFAULT_ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@ditsndots.com').trim().toLowerCase();
+const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+function hashPassword(plain: string): string {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derived = crypto.scryptSync(plain, salt, 64).toString('hex');
+  return `${salt}:${derived}`;
+}
+
+function verifyPasswordHash(plain: string, stored: string): boolean {
+  if (!plain || !stored) return false;
+  const parts = stored.split(':');
+  if (parts.length !== 2) return false;
+  const [salt, keyHex] = parts;
+  try {
+    const derived = crypto.scryptSync(plain, salt, 64);
+    const keyBuf = Buffer.from(keyHex, 'hex');
+    if (derived.length !== keyBuf.length) return false;
+    return crypto.timingSafeEqual(derived, keyBuf);
+  } catch {
+    return false;
+  }
+}
+
+async function getAdminCredentials(): Promise<{ email: string; passwordHash: string } | null> {
+  try {
+    const res = await pool.query('SELECT email, password_hash FROM admin_credentials WHERE id = 1 LIMIT 1;');
+    if (res.rows.length > 0) {
+      return {
+        email: String(res.rows[0].email || DEFAULT_ADMIN_EMAIL).trim().toLowerCase(),
+        passwordHash: String(res.rows[0].password_hash || ''),
+      };
+    }
+  } catch (err) {
+    console.error('Failed to read admin_credentials:', err);
+  }
+  return null;
+}
+
+async function verifyAdminPassword(plain: string): Promise<boolean> {
+  if (!plain) return false;
+  const creds = await getAdminCredentials();
+  if (creds && creds.passwordHash) {
+    return verifyPasswordHash(plain, creds.passwordHash);
+  }
+  return plain === DEFAULT_ADMIN_PASSWORD;
+}
+
+async function verifyAdminCredentials(email: string, password: string): Promise<{ ok: boolean; email?: string }> {
+  const cleanEmail = (email || '').trim().toLowerCase();
+  if (!cleanEmail || !password) return { ok: false };
+  const creds = await getAdminCredentials();
+  if (creds && creds.passwordHash) {
+    const ok = cleanEmail === creds.email && verifyPasswordHash(password, creds.passwordHash);
+    return ok ? { ok: true, email: creds.email } : { ok: false };
+  }
+  const ok = cleanEmail === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD;
+  return ok ? { ok: true, email: DEFAULT_ADMIN_EMAIL } : { ok: false };
+}
 
 // Automatically ensure schema tables and columns exist
 async function initDbSchema() {
@@ -270,6 +333,23 @@ async function initDbSchema() {
       `);
     }
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS admin_credentials (
+        id INTEGER PRIMARY KEY DEFAULT 1,
+        email VARCHAR(255) NOT NULL DEFAULT 'admin@ditsndots.com',
+        password_hash TEXT NOT NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+
+    const adminRes = await pool.query('SELECT COUNT(*) FROM admin_credentials WHERE id = 1;');
+    if (parseInt(adminRes.rows[0].count, 10) === 0) {
+      await pool.query(
+        'INSERT INTO admin_credentials (id, email, password_hash) VALUES (1, $1, $2) ON CONFLICT (id) DO NOTHING;',
+        [DEFAULT_ADMIN_EMAIL, hashPassword(DEFAULT_ADMIN_PASSWORD)]
+      );
+    }
+
     console.log("Database schema migration: successfully ensured all columns and dynamic tables.");
   } catch (err) {
     console.error("Database schema init warning:", err);
@@ -279,7 +359,7 @@ async function initDbSchema() {
 app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
   methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'x-admin-password'],
+  allowedHeaders: ['Content-Type', 'x-admin-password', 'x-admin-email'],
 }));
 app.use(express.json({ limit: '10mb' }));
 
@@ -1082,24 +1162,65 @@ app.get('/api/content', async (req, res) => {
   }
 });
 
-// REST POST: Verify admin password
-app.post('/api/auth/verify', (req, res) => {
-  const { password } = req.body;
-  const expectedPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  if (password === expectedPassword) {
-    res.json({ success: true });
+// REST POST: Verify admin email + password
+app.post('/api/auth/verify', async (req, res) => {
+  const { email, password } = req.body || {};
+  const result = await verifyAdminCredentials(String(email || ''), String(password || ''));
+  if (result.ok) {
+    res.json({ success: true, email: result.email });
   } else {
-    res.status(401).json({ error: 'Unauthorized: Invalid password' });
+    res.status(401).json({ error: 'Invalid email or password.' });
+  }
+});
+
+// REST POST: Update admin email and/or password
+app.post('/api/auth/update', async (req, res) => {
+  const { currentPassword, newEmail, newPassword } = req.body || {};
+  const currentPassStr = String(currentPassword || '');
+
+  const isAuthorized = await verifyAdminPassword(currentPassStr);
+  if (!isAuthorized) {
+    return res.status(401).json({ error: 'Current password is incorrect.' });
+  }
+
+  const creds = await getAdminCredentials();
+  const nextEmail = String(newEmail || '').trim().toLowerCase() || creds?.email || DEFAULT_ADMIN_EMAIL;
+  const nextPassStr = String(newPassword || '');
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+  if (nextPassStr && nextPassStr.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters.' });
+  }
+
+  const nextHash = nextPassStr
+    ? hashPassword(nextPassStr)
+    : creds?.passwordHash || hashPassword(currentPassStr);
+
+  try {
+    await pool.query(
+      `INSERT INTO admin_credentials (id, email, password_hash, updated_at)
+       VALUES (1, $1, $2, NOW())
+       ON CONFLICT (id) DO UPDATE SET email = EXCLUDED.email, password_hash = EXCLUDED.password_hash, updated_at = NOW();`,
+      [nextEmail, nextHash]
+    );
+    res.json({
+      success: true,
+      email: nextEmail,
+      message: 'Admin credentials updated successfully.',
+    });
+  } catch (error: any) {
+    console.error('Failed to update admin credentials:', error);
+    res.status(500).json({ error: 'Failed to update admin credentials in database.' });
   }
 });
 
 // REST POST: Clear all data from all sections
 app.post('/api/content/clear', async (req, res) => {
-  const password = req.headers['x-admin-password'];
+  const password = String(req.headers['x-admin-password'] || '');
 
-  // Check admin password
-  const expectedPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  if (password !== expectedPassword) {
+  if (!(await verifyAdminPassword(password))) {
     return res.status(401).json({ error: 'Unauthorized: Invalid password' });
   }
 
@@ -1220,11 +1341,9 @@ app.post('/api/content/clear', async (req, res) => {
 app.post('/api/content/:id', async (req, res) => {
   const { id } = req.params;
   const contentBody = req.body;
-  const password = req.headers['x-admin-password'];
+  const password = String(req.headers['x-admin-password'] || '');
 
-  // Check admin password
-  const expectedPassword = process.env.ADMIN_PASSWORD || 'admin123';
-  if (password !== expectedPassword) {
+  if (!(await verifyAdminPassword(password))) {
     return res.status(401).json({ error: 'Unauthorized: Invalid password' });
   }
 
@@ -1509,6 +1628,111 @@ app.post('/api/content/:id', async (req, res) => {
   } catch (error: any) {
     console.error(`Failed to update SQL table for section '${id}':`, error);
     res.status(500).json({ error: `Failed to update section content: ${error.message || error}` });
+  }
+});
+
+// REST POST: Send "Let's get started" contact inquiry email via Nodemailer
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+app.post('/api/contact/send', async (req, res) => {
+  const { fullName, emailAddress, projectType, message } = req.body || {};
+  const cleanName = String(fullName || '').trim();
+  const cleanEmail = String(emailAddress || '').trim();
+  const cleanType = String(projectType || 'General Inquiry').trim();
+  const cleanMessage = String(message || '').trim();
+
+  if (!cleanName || !cleanEmail || !cleanMessage) {
+    return res.status(400).json({ error: 'Please fill in your name, email address, and message.' });
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+    return res.status(400).json({ error: 'Please enter a valid email address.' });
+  }
+
+  const smtpUser = (process.env.SMTP_USER || '').trim();
+  const smtpPass = (process.env.SMTP_PASS || '').trim();
+  const smtpHost = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
+  const smtpPort = Number(process.env.SMTP_PORT || 465);
+  const smtpSecure =
+    process.env.SMTP_SECURE !== undefined
+      ? String(process.env.SMTP_SECURE).toLowerCase() === 'true'
+      : smtpPort === 465;
+  const receiverEmail = (process.env.CONTACT_RECEIVER_EMAIL || smtpUser).trim();
+
+  if (!smtpUser || !smtpPass || !receiverEmail) {
+    return res.status(500).json({
+      error: 'Email service is not configured yet. Please check SMTP_USER and SMTP_PASS in backend/.env.',
+    });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    const safeName = escapeHtml(cleanName);
+    const safeEmail = escapeHtml(cleanEmail);
+    const safeType = escapeHtml(cleanType);
+    const safeMsg = escapeHtml(cleanMessage).replace(/\n/g, '<br/>');
+
+    await transporter.sendMail({
+      from: `"DitsNDots Website" <${smtpUser}>`,
+      to: receiverEmail,
+      replyTo: `"${cleanName}" <${cleanEmail}>`,
+      subject: `New Project Inquiry (${cleanType}) — ${cleanName}`,
+      text: [
+        `New project inquiry from DitsNDots website`,
+        ``,
+        `Name: ${cleanName}`,
+        `Email: ${cleanEmail}`,
+        `Project Type: ${cleanType}`,
+        ``,
+        `Message:`,
+        cleanMessage,
+      ].join('\n'),
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; color: #0E0E0E; background: #F7F6F3; padding: 28px; border-radius: 16px; border: 1px solid #E2E1DB;">
+          <h2 style="margin: 0 0 6px; font-size: 22px; color: #0E0E0E;">New Project Inquiry</h2>
+          <p style="margin: 0 0 22px; font-size: 13px; color: #0082C8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">${safeType}</p>
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 14px;">
+            <tr>
+              <td style="padding: 8px 0; color: #6B6A64; width: 120px; font-weight: 600;">Full Name</td>
+              <td style="padding: 8px 0; color: #0E0E0E; font-weight: 700;">${safeName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6B6A64; font-weight: 600;">Email</td>
+              <td style="padding: 8px 0; color: #0082C8; font-weight: 600;">${safeEmail}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #6B6A64; font-weight: 600;">Project Type</td>
+              <td style="padding: 8px 0; color: #0E0E0E;">${safeType}</td>
+            </tr>
+          </table>
+          <div style="background: #FFFFFF; padding: 18px 20px; border-radius: 12px; border: 1px solid #E2E1DB; font-size: 14.5px; line-height: 1.65; color: #1F1F1D;">
+            ${safeMsg}
+          </div>
+        </div>
+      `,
+    });
+
+    res.json({ success: true, message: 'Message sent successfully.' });
+  } catch (error: any) {
+    console.error('Failed to send contact email:', error);
+    res.status(500).json({
+      error: 'Could not send email right now. Please check your SMTP credentials or try again.',
+    });
   }
 });
 
