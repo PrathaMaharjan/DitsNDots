@@ -67,24 +67,24 @@
   left: 0;
   background: linear-gradient(
     to right,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 12%,
-    rgba(255, 255, 255, 0.86) 34%,
-    rgba(255, 255, 255, 0.55) 56%,
-    rgba(255, 255, 255, 0.22) 78%,
-    rgba(255, 255, 255, 0) 100%
+    rgba(247, 246, 243, 1) 0%,
+    rgba(247, 246, 243, 1) 12%,
+    rgba(247, 246, 243, 0.86) 34%,
+    rgba(247, 246, 243, 0.55) 56%,
+    rgba(247, 246, 243, 0.22) 78%,
+    rgba(247, 246, 243, 0) 100%
   );
 }
 .ab-marquee-fade--r {
   right: 0;
   background: linear-gradient(
     to left,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 12%,
-    rgba(255, 255, 255, 0.86) 34%,
-    rgba(255, 255, 255, 0.55) 56%,
-    rgba(255, 255, 255, 0.22) 78%,
-    rgba(255, 255, 255, 0) 100%
+    rgba(247, 246, 243, 1) 0%,
+    rgba(247, 246, 243, 1) 12%,
+    rgba(247, 246, 243, 0.86) 34%,
+    rgba(247, 246, 243, 0.55) 56%,
+    rgba(247, 246, 243, 0.22) 78%,
+    rgba(247, 246, 243, 0) 100%
   );
 }
 
@@ -834,12 +834,51 @@
 @media (max-width: 900px) {
   .ab-cap-head,
   .ab-grid-split {
+    grid-template-columns: minmax(0, 1fr) !important;
     justify-content: start !important;
+  }
+  .ab-sticky-head {
+    position: static !important;
   }
   .ab-cap-head p,
   .ab-grid-split > p {
     text-align: left !important;
     justify-self: start !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .ab-grid-footer {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .ab-quote-bleed {
+    height: 390px !important;
+  }
+  .ab-quote-bleed blockquote {
+    padding: 24px !important;
+  }
+  /* Tighter vertical rhythm between sections on mobile */
+  [data-works-head="1"] {
+    padding-top: 155px !important;
+  }
+  [data-screen-label="Trusted by"] {
+    padding-top: 52px !important;
+    padding-bottom: 52px !important;
+  }
+  #reviews {
+    padding-top: 52px !important;
+    padding-bottom: 52px !important;
+  }
+  #faq {
+    padding-top: 52px !important;
+    padding-bottom: 60px !important;
+  }
+  #contact {
+    padding-top: 24px !important;
+    padding-bottom: 56px !important;
+  }
+  footer[data-nav-tone="dark"] {
+    padding-top: 160px !important;
   }
 }
 

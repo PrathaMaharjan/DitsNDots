@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { BRAND_LIGHT, INK, displayFont, bodyFont } from "./tokens";
 import SectionHeading from "./SectionHeading";
+import GreenWavePattern from "./GreenWavePattern";
 import { getProjectSlug } from "../../lib/v2/workProjects";
 
 interface ProjectData {
@@ -69,18 +70,18 @@ const BG_IS_DARK = true;
 
 const T = BG_IS_DARK
   ? {
-      field: "#02AA7A",
+      field: "#0082C8",
       eyebrow: "#0B111A",
       heading: "#FFFFFF",
       body: "rgba(255, 255, 255, 0.92)",
-      wash: "radial-gradient(120% 80% at 50% 46%, rgba(255, 255, 255, 0.12) 0%, rgba(2, 170, 122, 0) 72%)",
-      cardShadow: "0 20px 48px rgba(0, 38, 26, 0.36), 0 0 0 1px rgba(247,246,243,0.18)",
-      cardHoverShadow: `0 34px 74px rgba(0, 38, 26, 0.48), 0 0 0 2px #FFFFFF`,
+      wash: "radial-gradient(120% 80% at 50% 46%, rgba(255, 255, 255, 0.12) 0%, rgba(0, 130, 200, 0) 72%)",
+      cardShadow: "0 20px 48px rgba(0, 32, 58, 0.36), 0 0 0 1px rgba(247,246,243,0.18)",
+      cardHoverShadow: `0 34px 74px rgba(0, 32, 58, 0.48), 0 0 0 2px #FFFFFF`,
       panelBg: "rgba(255, 255, 255, 0.96)",
       panelBorder: "1px solid rgba(11, 17, 26, 0.08)",
-      panelShadow: "0 22px 54px rgba(0, 38, 26, 0.28)",
+      panelShadow: "0 22px 54px rgba(0, 32, 58, 0.28)",
       panelName: "#0B111A",
-      panelMeta: "#02AA7A",
+      panelMeta: "#0082C8",
       btnBg: "#0B111A",
       btnInk: "#FFFFFF",
       navTone: "dark",
@@ -367,8 +368,9 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
         flexDirection: "column",
       }}
     >
-      {/* Wash over the ground */}
-      <div aria-hidden style={{ position: "absolute", inset: 0, background: T.wash }} />
+      {/* Silky flowing wave pattern + soft wash over the green ground */}
+      <GreenWavePattern />
+      <div aria-hidden style={{ position: "absolute", inset: 0, background: T.wash, pointerEvents: "none" }} />
 
       <div
         data-works-head="1"
@@ -526,7 +528,7 @@ export default function WorksCarousel({ data }: WorksCarouselProps) {
                               fontWeight: 700,
                               letterSpacing: ".14em",
                               textTransform: "uppercase",
-                              color: "#02AA7A",
+                              color: "#7DE8FF",
                               marginBottom: 6,
                             }}
                           >

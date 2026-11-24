@@ -105,9 +105,9 @@ export default function IndividualWorkPage() {
         "--ab-bg": "#F7F6F3",
         "--ab-ink": "#0E0E0E",
         "--ab-card": "#EAE9E4",
-        "--ab-ink-deep": "#02AA7A",
+        "--ab-ink-deep": "#0082C8",
         fontFamily: bodyFont,
-        background: "#02AA7A",
+        background: "#0082C8",
         color: "#0E0E0E",
         minHeight: "100vh",
       } as React.CSSProperties}
@@ -129,7 +129,6 @@ export default function IndividualWorkPage() {
             data-light-sheet="1"
             data-light-sheet-top="flat"
             data-nav-tone="light"
-            className="ab-sheet-rise"
             style={{
               position: "relative",
               zIndex: 5,
@@ -337,8 +336,20 @@ export default function IndividualWorkPage() {
                 .ab-proj-nav-btn:hover .ab-proj-nav-arrow-r {
                   transform: translateX(4px);
                 }
+                @media (max-width: 640px) {
+                  .ab-proj-nav-row {
+                    flex-direction: column;
+                    align-items: stretch !important;
+                  }
+                  .ab-proj-nav-btn {
+                    justify-content: space-between;
+                    width: 100%;
+                    box-sizing: border-box;
+                  }
+                }
               `}</style>
               <div
+                className="ab-proj-nav-row"
                 style={{
                   marginTop: 48,
                   paddingTop: 28,
@@ -346,7 +357,8 @@ export default function IndividualWorkPage() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  gap: 16,
+                  flexWrap: "wrap",
+                  gap: 14,
                 }}
               >
                 {prevProject ? (

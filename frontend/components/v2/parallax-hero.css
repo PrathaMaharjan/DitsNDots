@@ -43,7 +43,7 @@
      on a sticky child to hold the type on screen while its words light, so
      clipping is scoped to .parallax__header (which is what actually holds
      the plates) rather than applied to the whole hero. */
-  background-color: #02AA7A;
+  background-color: #0082C8;
   color: var(--color-light);
 }
 
@@ -59,6 +59,28 @@
   /* The layer plates overscan by --parallax-overscan and would otherwise
      spill past the hero; this is the clip that used to live on .parallax. */
   overflow: hidden;
+}
+
+/* Soft top-to-bottom feathered blur behind the navbar on the Hero section so
+   the logo and links read cleanly without a hard rectangular bar. */
+.parallax__nav-blur {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 136px;
+  z-index: 20;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(247, 246, 243, 0.54) 0%,
+    rgba(247, 246, 243, 0.24) 54%,
+    rgba(247, 246, 243, 0) 100%
+  );
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 44%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 44%, transparent 100%);
 }
 
 /* The hero's lower band. In the Osmo source this was an empty spacer that
@@ -182,10 +204,25 @@
   margin-bottom: 0.1em;
   margin-right: 0.075em;
   font-family: 'PP Neue Corp Wide', sans-serif;
-  font-size: 11vw;
+  font-size: clamp(36px, 11vw, 172px);
   font-weight: 800;
   line-height: 1;
   position: relative;
+}
+
+@media (max-width: 640px) {
+  .parallax {
+    --container-padding: 1.25rem;
+    --section-padding: 2.5rem;
+  }
+  .parallax__content {
+    min-height: 135svh;
+    border-radius: 0 0 28px 28px;
+  }
+  .parallax__statement {
+    font-size: clamp(22px, 6.2vw, 34px);
+    line-height: 1.32;
+  }
 }
 
 /* Typewriter caret for the hero title — white to match the title, unlike

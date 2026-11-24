@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Instrument_Serif, Manrope, Noto_Sans_Devanagari, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import "./v2-animations.css";
+import InitialLoader from "../components/v2/InitialLoader";
+import SlideOverTransition from "../components/v2/SlideOverTransition";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -51,7 +53,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${manrope.variable} ${spaceGrotesk.variable} ${notoDevanagari.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <InitialLoader />
+        <SlideOverTransition />
+        {children}
+      </body>
     </html>
   );
 }

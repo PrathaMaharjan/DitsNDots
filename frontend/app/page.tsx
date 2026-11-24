@@ -163,9 +163,9 @@ export default function Home() {
         "--ab-brand": "#E84610",
         "--ab-brand-light": "#F2997C",
         "--ab-card": "#EAE9E4",
-        "--ab-ink-deep": "#02AA7A",
+        "--ab-ink-deep": "#0082C8",
         fontFamily: "var(--font-manrope), system-ui, sans-serif",
-        background: "#02AA7A",
+        background: "#0082C8",
         color: "var(--ab-ink)",
       } as React.CSSProperties}
     >
@@ -204,6 +204,21 @@ export default function Home() {
               {gate(capabilities, <CapabilitiesPetals data={capabilities!} />, "Our capabilities")} */}
           {/* {gate(capabilities, <CapabilitiesPetals data={capabilities!} />, "Our capabilities")} */}
           {capabilities ? <CapabilitiesGridV2 data={capabilities} /> : null}
+          {/* Uniform viewport scrim behind the rising TrustedBy cream sheet so Our Services
+              AND the blue side gutters dim together with zero color step */}
+          <div
+            data-cap-scrim="1"
+            aria-hidden="true"
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "#040A12",
+              opacity: 0,
+              pointerEvents: "none",
+              zIndex: 3,
+              willChange: "opacity",
+            }}
+          />
           {/* REMOVED 2026-09-07: dot-texture seam band between the ink
               capabilities grid and the cream client band. The ink → cream
               handoff is a straight cut now. Component preserved in

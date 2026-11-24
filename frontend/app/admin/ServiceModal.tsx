@@ -22,7 +22,6 @@ interface ServiceModalProps {
 export default function ServiceModal({ service, onSave, onClose }: ServiceModalProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [tag, setTag] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [error, setError] = useState("");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -31,12 +30,10 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
     if (service) {
       setTitle(service.title || "");
       setDescription(service.description || "");
-      setTag(service.tag || "");
       setImageUrl(service.imageUrl || "");
     } else {
       setTitle("");
       setDescription("");
-      setTag("");
       setImageUrl("");
     }
   }, [service]);
@@ -83,7 +80,7 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
       description: description.trim(),
       imageUrl,
       label: service?.label || "",
-      tag: tag.trim(),
+      tag: "",
       badge: service?.badge || "",
     });
   };
@@ -198,20 +195,6 @@ export default function ServiceModal({ service, onSave, onClose }: ServiceModalP
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="w-full px-4 py-3 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand font-medium text-foreground resize-none"
-            />
-          </div>
-
-          {/* Sub-tags shown at bottom of service stack card */}
-          <div>
-            <label className="block text-[11px] font-mono font-bold tracking-widest text-neutral-500 uppercase mb-2">
-              Card Bottom Tags (Comma-separated)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Web Development, Full-Stack"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand font-medium text-foreground"
             />
           </div>
 

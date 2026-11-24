@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useRef } from "react";
 import { displayFont } from "./tokens";
+import GreenWavePattern from "./GreenWavePattern";
 
 interface PieceSpec {
   id: string;
@@ -22,15 +23,15 @@ interface PieceSpec {
 const PIECES: PieceSpec[] = [
   { id: "D1", char: "D", color: "#FFFFFF", vbW: 86 },
   { id: "I1", char: "I", color: "#0B111A", vbW: 44 },
-  { id: "T1", char: "T", color: "#00589B", vbW: 84 },
+  { id: "T1", char: "T", color: "#00467A", vbW: 84 },
   { id: "S1", char: "S", color: "#FFFFFF", vbW: 82 },
-  { id: "N1", char: "N", color: "#0082C8", vbW: 90 },
+  { id: "N1", char: "N", color: "#02AA7A", vbW: 90 },
   { id: "D2", char: "D", color: "#0B111A", vbW: 86 },
-  { id: "O1", char: "O", color: "#00589B", vbW: 92 },
+  { id: "O1", char: "O", color: "#00467A", vbW: 92 },
   { id: "T2", char: "T", color: "#FFFFFF", vbW: 84 },
   { id: "S2", char: "S", color: "#0B111A", vbW: 82 },
-  { id: "dot-blue", char: "DOT", color: "#00589B", vbW: 46 },
-  { id: "dot-cyan", char: "DOT", color: "#0082C8", vbW: 42 },
+  { id: "dot-blue", char: "DOT", color: "#00467A", vbW: 46 },
+  { id: "dot-green", char: "DOT", color: "#02AA7A", vbW: 42 },
   { id: "dot-dark", char: "DOT", color: "#0B111A", vbW: 44 },
 ];
 
@@ -233,16 +234,16 @@ export default function FooterV2() {
       frameRef.current = 0;
 
       const letters = bodies.filter((b) => b.spec.char !== "DOT");
-      const gap = Math.max(4, w * 0.006);
+      const gap = Math.max(4, w * 0.005);
       const totalW = letters.reduce((sum, b) => sum + b.w, 0) + gap * (letters.length - 1);
-      // Position the assembled word across the center-right of the stage
-      let cursorX = Math.max(24, Math.min(w - totalW - 24, w * 0.28));
-      const wordY = Math.max(70, h * 0.34);
+      // Position the assembled word across the right half of the stage (leaving left info columns clear)
+      let cursorX = Math.max(24, w - totalW - Math.max(24, w * 0.03));
+      const wordY = Math.max(80, h * 0.42);
 
       bodies.forEach((b, i) => {
         if (b.spec.char === "DOT") {
           const dotIdx = i - letters.length;
-          b.x = w * (0.22 + dotIdx * 0.26);
+          b.x = w * (0.56 + dotIdx * 0.14);
           b.y = Math.max(36, wordY - 68);
           b.vx = (Math.random() - 0.5) * 70;
           b.vy = 0;
@@ -438,6 +439,8 @@ export default function FooterV2() {
     };
     draw();
 
+    let idleFrames = 0;
+
     const loop = (now: number) => {
       if (!runningRef.current) return;
       const last = lastRef.current || now;
@@ -450,11 +453,42 @@ export default function FooterV2() {
         steps++;
       }
       draw();
+
+      // Auto-sleep the physics rAF loop once all pieces have settled on the floor
+      // (re-wakes immediately on pointerdown if the user drags a piece).
+      let allLive = true;
+      let anyHeld = false;
+      let maxMotion = 0;
+      for (const b of bodies) {
+        if (!b.live) {
+          allLive = false;
+          break;
+        }
+        if (b.held) {
+          anyHeld = true;
+          break;
+        }
+        const m = Math.abs(b.vx) + Math.abs(b.vy) + Math.abs(b.va) * 45;
+        if (m > maxMotion) maxMotion = m;
+      }
+
+      if (allLive && !anyHeld && maxMotion < 12) {
+        idleFrames += 1;
+        if (idleFrames >= 45) {
+          runningRef.current = false;
+          rafRef.current = null;
+          return;
+        }
+      } else {
+        idleFrames = 0;
+      }
+
       rafRef.current = requestAnimationFrame(loop);
     };
 
     const start = () => {
       if (runningRef.current) return;
+      idleFrames = 0;
       runningRef.current = true;
       lastRef.current = 0;
       accRef.current = 0;
@@ -575,15 +609,27 @@ export default function FooterV2() {
       style={{
         position: "relative",
         zIndex: 1,
-        background: "#02AA7A",
+        background: "#0082C8",
         color: "#F7F6F3",
-        padding: "clamp(220px, 28vh, 320px) clamp(18px, 3.6vw, 60px) clamp(24px, 3.5vh, 42px)",
+        padding: "clamp(195px, 24vh, 255px) clamp(18px, 3.6vw, 60px) clamp(20px, 2.8vh, 32px)",
         overflow: "hidden",
       }}
     >
+      <GreenWavePattern />
+      <style>{`
+        .ab-footer-cta-arrow {
+          display: inline-block;
+          transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .ab-footer-cta-head:hover .ab-footer-cta-arrow {
+          transform: translateX(10px);
+        }
+      `}</style>
       <div
         data-footer-inner="1"
         style={{
+          position: "relative",
+          zIndex: 2,
           maxWidth: 1680,
           margin: "0 auto",
           width: "100%",
@@ -591,29 +637,84 @@ export default function FooterV2() {
           transformOrigin: "50% 35%",
         }}
       >
-        {/* Humaan-style interactive stage */}
+        {/* Unified interactive footer stage: heading + left info columns at top-left, open floor below for physics letters */}
         <div
           ref={boxRef}
           style={{
             position: "relative",
             width: "100%",
-            height: "clamp(340px, 38vw, 450px)",
-            borderBottom: "1px solid rgba(247, 246, 243, 0.16)",
+            minHeight: "clamp(360px, 38vw, 460px)",
+            paddingBottom: "clamp(150px, 18vw, 210px)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.28)",
             overflow: "hidden",
             userSelect: "none",
             touchAction: "pan-y",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            gap: "clamp(22px, 3.4vh, 36px)",
           }}
         >
-          {/* Info columns layered over the upper-left of the stage */}
+          {/* Top-Left Big Humaan-style Display Heading */}
+          <div
+            data-rv="up"
+            style={{
+              ["--rv-i" as string]: 0,
+              position: "relative",
+              zIndex: 3,
+              pointerEvents: "none",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("ditsndots:open-project-sheet"));
+              }}
+              className="ab-footer-cta-head"
+              style={{
+                display: "inline-block",
+                padding: 0,
+                border: "none",
+                background: "transparent",
+                textAlign: "left",
+                cursor: "pointer",
+                pointerEvents: "auto",
+              }}
+            >
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: displayFont,
+                  fontWeight: 700,
+                  fontSize: "clamp(34px, 4.8vw, 72px)",
+                  lineHeight: 1.04,
+                  letterSpacing: "-0.04em",
+                  color: "#FFFFFF",
+                }}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.2em" }}>
+                  <span>Let&apos;s make</span>
+                  <span className="ab-footer-cta-arrow" aria-hidden="true" style={{ color: "#0B111A" }}>
+                    &rarr;
+                  </span>
+                </span>
+                <br />
+                <span>
+                  something <span style={{ color: "#0B111A" }}>extraordinary</span>
+                </span>
+              </h2>
+            </button>
+          </div>
+
+          {/* Clean borderless info columns aligned to the bottom-left */}
           <div
             className="ab-grid-footer"
             style={{
               position: "relative",
               zIndex: 3,
               display: "grid",
-              gridTemplateColumns: "repeat(2, minmax(190px, 260px))",
-              gap: "clamp(20px, 3vw, 36px)",
-              paddingTop: "clamp(10px, 1.5vh, 20px)",
+              gridTemplateColumns: "repeat(2, minmax(180px, 240px))",
+              gap: "clamp(24px, 3.6vw, 52px)",
               pointerEvents: "none",
             }}
           >
@@ -621,19 +722,14 @@ export default function FooterV2() {
             <div
               data-rv="up"
               style={{
-                ["--rv-i" as string]: 0,
+                ["--rv-i" as string]: 1,
                 display: "flex",
                 flexDirection: "column",
-                gap: 12,
-                background: "rgba(11, 17, 26, 0.16)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255, 255, 255, 0.22)",
-                borderRadius: 18,
-                padding: "18px 20px",
+                gap: 8,
               }}
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 15, fontWeight: 800, color: "#FFFFFF" }}>
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.1" aria-hidden="true">
+              <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 15, fontWeight: 800, color: "#FFFFFF" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2.1" aria-hidden="true">
                   <circle cx="12" cy="12" r="9.5" />
                   <path d="M2.5 12h19M12 2.5c2.8 2.7 4.4 6 4.4 9.5s-1.6 6.8-4.4 9.5c-2.8-2.7-4.4-6-4.4-9.5s1.6-6.8 4.4-9.5z" />
                 </svg>
@@ -646,9 +742,9 @@ export default function FooterV2() {
                 style={{
                   pointerEvents: "auto",
                   fontFamily: "inherit",
-                  fontSize: 15,
-                  fontWeight: 700,
-                  color: "#FFFFFF",
+                  fontSize: 14.5,
+                  fontWeight: 600,
+                  color: "rgba(255, 255, 255, 0.88)",
                   wordBreak: "break-all",
                   cursor: "default",
                   userSelect: "none",
@@ -663,19 +759,14 @@ export default function FooterV2() {
             <div
               data-rv="up"
               style={{
-                ["--rv-i" as string]: 1,
+                ["--rv-i" as string]: 2,
                 display: "flex",
                 flexDirection: "column",
-                gap: 10,
-                background: "rgba(11, 17, 26, 0.16)",
-                backdropFilter: "blur(8px)",
-                border: "1px solid rgba(255, 255, 255, 0.22)",
-                borderRadius: 18,
-                padding: "18px 20px",
+                gap: 6,
               }}
             >
-              <span style={{ fontSize: 15, fontWeight: 800, color: "#FFFFFF", letterSpacing: ".02em" }}>USA</span>
-              <span style={{ fontSize: 15, fontWeight: 600, color: "rgba(255, 255, 255, 0.92)", lineHeight: 1.5 }}>
+              <span style={{ fontSize: 15, fontWeight: 800, color: "#FFFFFF", letterSpacing: ".01em" }}>USA</span>
+              <span style={{ fontSize: 14.5, fontWeight: 500, color: "rgba(255, 255, 255, 0.86)", lineHeight: 1.45 }}>
                 3620 Adelaide
                 <br />
                 The Colony, TX 75056
@@ -687,7 +778,7 @@ export default function FooterV2() {
                 style={{
                   pointerEvents: "auto",
                   fontFamily: "inherit",
-                  fontSize: 14,
+                  fontSize: 14.5,
                   fontWeight: 700,
                   color: "#0B111A",
                   cursor: "default",
@@ -724,7 +815,6 @@ export default function FooterV2() {
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  filter: "drop-shadow(0 6px 0px rgba(7, 17, 14, 0.22))",
                   cursor: "grab",
                   userSelect: "none",
                   touchAction: "none",
@@ -759,31 +849,16 @@ export default function FooterV2() {
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 9,
-                fontFamily: displayFont,
-                fontWeight: 800,
-                fontSize: 17,
-                letterSpacing: "-.02em",
-                color: "#FFFFFF",
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/logo.png"
-                alt="Dits N Dots logo"
-                style={{ width: 30, height: 30, objectFit: "contain", display: "block" }}
+                src="/logo/dark%20logo.png"
+                alt="Dits N Dots"
+                style={{ height: 64, width: "auto", objectFit: "contain", display: "block", margin: "-12px 0" }}
               />
-              <span>
-                DITS<span style={{ color: "#0082C8" }}>N</span>DOTS
-              </span>
             </span>
             <span>&copy; 2026 Dits and Dots Agency</span>
-            <a className="ab-flink ab-flink--quiet" href="#privacy" style={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF", textDecoration: "underline", textUnderlineOffset: 3 }}>
-              Privacy
-            </a>
-            <a className="ab-flink ab-flink--quiet" href="#legal" style={{ fontSize: 13, fontWeight: 700, color: "#FFFFFF", textDecoration: "underline", textUnderlineOffset: 3 }}>
-              Legal
-            </a>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 16, fontWeight: 700, color: "#FFFFFF" }}>

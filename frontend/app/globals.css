@@ -44,43 +44,108 @@ body::-webkit-scrollbar {
   height: 0;
 }
 
-/* Pure GPU-composited smooth bottom-to-top rise for /work and /work/[slug].
-   A ::before curved cream cap rides at top: -44px so the leading edge is visibly
-   curved while rising from below, then naturally slides offscreen above the
-   viewport so the settled page is completely flat — zero border-radius repaints! */
-@keyframes ab-sheet-rise-curved {
+/* Codrops Interlude-style Slide-Over Page Transition:
+   The outgoing page recedes slightly and darkens behind while the incoming
+   page slides cleanly up from the bottom over the viewport. */
+@keyframes ab-slide-over-out {
+  from {
+    filter: brightness(1);
+  }
+  to {
+    filter: brightness(0.6);
+  }
+}
+
+@keyframes ab-slide-over-in {
   0% {
-    transform: translate3d(0, 100vh, 0) scaleX(0.95);
+    transform: translate3d(0, 100vh, 0);
+    border-top-left-radius: 48px;
+    border-top-right-radius: 48px;
   }
-
+  75% {
+    border-top-left-radius: 36px;
+    border-top-right-radius: 36px;
+  }
   100% {
-    transform: translate3d(0, 0, 0) scaleX(1);
+    transform: translate3d(0, 0, 0);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
   }
 }
 
-.ab-sheet-rise {
-  transform-origin: center top;
-  animation: ab-sheet-rise-curved 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+/* Reverse (Back) animations: current page peels/slides DOWN off the bottom
+   while the previous page brightens back up underneath. */
+@keyframes ab-slide-back-out {
+  0% {
+    transform: translate3d(0, 0, 0);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+  }
+  25% {
+    border-top-left-radius: 36px;
+    border-top-right-radius: 36px;
+  }
+  100% {
+    transform: translate3d(0, 100vh, 0);
+    border-top-left-radius: 48px;
+    border-top-right-radius: 48px;
+  }
 }
 
-.ab-sheet-rise::before {
-  content: "";
-  position: absolute;
-  top: -44px;
-  left: 0;
-  right: 0;
-  height: 48px;
-  background: #F7F6F3;
-  border-top-left-radius: 48px;
-  border-top-right-radius: 48px;
-  pointer-events: none;
+@keyframes ab-slide-back-in {
+  from {
+    filter: brightness(0.6);
+  }
+  to {
+    filter: brightness(1);
+  }
+}
+
+::view-transition-group(root) {
+  animation-duration: 0.85s;
+  animation-timing-function: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  overflow: hidden;
+  transform-origin: center center;
+  animation: ab-slide-over-out 0.85s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  overflow: hidden;
+  box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.35);
+  animation: ab-slide-over-in 0.85s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+html[data-transition-dir="back"]::view-transition-old(root) {
+  z-index: 2;
+  overflow: hidden;
+  box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.35);
+  animation: ab-slide-back-out 0.85s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+html[data-transition-dir="back"]::view-transition-new(root) {
+  z-index: 1;
+  overflow: hidden;
+  box-shadow: none;
+  animation: ab-slide-back-in 0.85s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
 }
 
 /* Routes that end on the dark footer paint the canvas dark. The body
    background is what fills scroll overshoot and any sub-pixel gap under the
    last element — left light it reads as a white band below the footer. */
 body:has(.ab-page-dark-end) {
-  background: #02AA7A;
+  background: #0082C8;
 }
 
 /* Text selection in brand purple rather than the browser's default blue —
@@ -101,13 +166,13 @@ body:has(.ab-page-dark-end) {
 /* Dark sections (hero, the works carousel) invert it: deep brand behind
    the light brand tint, since #E84610 type on ink would be unreadable. */
 [data-nav-tone="dark"] ::selection {
-  background: rgba(232, 70, 16, 0.55);
-  color: #C4AEFF;
+  background: rgba(0, 130, 200, 0.42);
+  color: #FFFFFF;
 }
 
 [data-nav-tone="dark"] ::-moz-selection {
-  background: rgba(232, 70, 16, 0.55);
-  color: #C4AEFF;
+  background: rgba(0, 130, 200, 0.42);
+  color: #FFFFFF;
 }
 
 @keyframes spin-slow {
@@ -225,7 +290,7 @@ body:has(.ab-page-dark-end) {
   background-image: linear-gradient(100deg,
       rgba(255, 255, 255, 0) 30%,
       rgba(255, 255, 255, 0.75) 48%,
-      rgba(232, 70, 16, 0.1) 52%,
+      rgba(0, 130, 200, 0.1) 52%,
       rgba(255, 255, 255, 0) 70%);
   background-size: 800px 100%;
   background-repeat: no-repeat;
@@ -235,11 +300,11 @@ body:has(.ab-page-dark-end) {
 }
 
 .ab-skeleton--dark {
-  background-color: #221d33;
+  background-color: #162230;
   background-image: linear-gradient(100deg,
       rgba(255, 255, 255, 0) 30%,
-      rgba(242, 153, 124, 0.22) 48%,
-      rgba(242, 153, 124, 0.32) 52%,
+      rgba(56, 189, 248, 0.2) 48%,
+      rgba(0, 130, 200, 0.3) 52%,
       rgba(255, 255, 255, 0) 70%);
 }
 
@@ -257,22 +322,22 @@ body:has(.ab-page-dark-end) {
 }
 
 .ab-skel-eyebrow--dark {
-  color: rgba(196, 174, 255, 0.75);
+  color: rgba(186, 230, 253, 0.8);
 }
 
 .ab-skel-pulse {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #e84610;
-  box-shadow: 0 0 0 4px rgba(232, 70, 16, 0.14);
+  background: #0082C8;
+  box-shadow: 0 0 0 4px rgba(0, 130, 200, 0.16);
   animation: ab-skel-pulse-dot 1.4s ease-in-out infinite;
   flex-shrink: 0;
 }
 
 .ab-skel-pulse--dark {
-  background: #f2997c;
-  box-shadow: 0 0 0 4px rgba(242, 153, 124, 0.18);
+  background: #38BDF8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.2);
 }
 
 .ab-skel-orb {
@@ -280,14 +345,14 @@ body:has(.ab-page-dark-end) {
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(232, 70, 16, 0.35), transparent 65%);
+  background: radial-gradient(circle, rgba(0, 130, 200, 0.32), transparent 65%);
   filter: blur(10px);
   animation: ab-skel-orb-drift 5s ease-in-out infinite;
   pointer-events: none;
 }
 
 .ab-skel-orb--2 {
-  background: radial-gradient(circle, rgba(242, 153, 124, 0.28), transparent 65%);
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.24), transparent 65%);
   animation-delay: -2.5s;
 }
 

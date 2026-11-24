@@ -16,6 +16,7 @@ import StatsForm from "./StatsForm";
 import TestimonialsForm from "./TestimonialsForm";
 import CareersForm from "./CareersForm";
 import ContactForm from "./ContactForm";
+import SettingsForm from "./SettingsForm";
 
 import ProjectModal from "./ProjectModal";
 import LogoModal from "./LogoModal";
@@ -26,16 +27,18 @@ import StatModal from "./StatModal";
 import TestimonialModal from "./TestimonialModal";
 import RoleModal from "./RoleModal";
 
-type Tab = "logos" | "position" | "capabilities" | "work" | "stats" | "process" | "people" | "testimonials" | "careers" | "faq" | "contact";
+type Tab = "logos" | "position" | "capabilities" | "work" | "stats" | "process" | "people" | "testimonials" | "careers" | "faq" | "contact" | "settings";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState("");
   const [activeTab, setActiveTab] = useState<Tab>("position");
-  
+
   // Site data state
   const [content, setContent] = useState<any>(null);
   const [backupContent, setBackupContent] = useState<any>(null); // For resetting on cancel
@@ -59,9 +62,11 @@ export default function AdminPage() {
 
   // Authentication check
   useEffect(() => {
+    const savedEmail = localStorage.getItem("admin_email");
     const savedPassword = localStorage.getItem("admin_password");
-    if (savedPassword) {
-      verifyPassword(savedPassword);
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      verifyCredentials(savedEmail, savedPassword);
     } else {
       setLoading(false);
     }
@@ -69,28 +74,32 @@ export default function AdminPage() {
 
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    verifyPassword(password);
+    verifyCredentials(email, password);
   };
 
-  const verifyPassword = async (pass: string) => {
+  const verifyCredentials = async (adminEmail: string, pass: string) => {
     setAuthError("");
     setLoading(true);
     try {
-      // 1. Verify password with backend
+      // 1. Verify email + password with backend
       const authRes = await fetch(`${API_BASE}/api/auth/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ password: pass }),
+        body: JSON.stringify({ email: adminEmail.trim(), password: pass }),
       });
 
       if (!authRes.ok) {
         const errorData = await authRes.json();
-        setAuthError(errorData.error || "Invalid password.");
+        setAuthError(errorData.error || "Invalid email or password.");
+        localStorage.removeItem("admin_email");
         localStorage.removeItem("admin_password");
         return;
       }
+
+      const authData = await authRes.json();
+      const verifiedEmail = authData.email || adminEmail.trim().toLowerCase();
 
       // 2. Fetch content once authorized
       const res = await fetch(`${API_BASE}/api/content`);
@@ -98,7 +107,10 @@ export default function AdminPage() {
         const data = await res.json();
         setContent(data);
         setBackupContent(JSON.parse(JSON.stringify(data)));
+        setEmail(verifiedEmail);
+        setPassword(pass);
         setIsAuthenticated(true);
+        localStorage.setItem("admin_email", verifiedEmail);
         localStorage.setItem("admin_password", pass);
       } else {
         setAuthError("Failed to fetch initial server configurations.");
@@ -111,8 +123,10 @@ export default function AdminPage() {
   };
 
   const handleLogout = () => {
+    localStorage.removeItem("admin_email");
     localStorage.removeItem("admin_password");
     setIsAuthenticated(false);
+    setEmail("");
     setPassword("");
     setContent(null);
     setBackupContent(null);
@@ -165,7 +179,7 @@ export default function AdminPage() {
         try {
           sessionStorage.removeItem("ditsndots_content");
           sessionStorage.removeItem("abstrakt_content");
-        } catch (e) {}
+        } catch (e) { }
 
         setSaveStatus({
           message: `Saved changes to '${sectionId.toUpperCase()}' successfully.`,
@@ -215,12 +229,12 @@ export default function AdminPage() {
         try {
           sessionStorage.removeItem("ditsndots_content");
           sessionStorage.removeItem("abstrakt_content");
-        } catch (e) {}
+        } catch (e) { }
         setSaveStatus({
           message: "All database content successfully cleared. Ready for your manual input!",
           type: "success",
         });
-        
+
         // Fetch new empty content from server to update workspace state
         const fetchRes = await fetch(`${API_BASE}/api/content`);
         if (fetchRes.ok) {
@@ -271,26 +285,60 @@ export default function AdminPage() {
         <div className="w-full max-w-md bg-white border border-neutral-200 shadow-xl rounded-2xl p-8">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-black tracking-tight text-neutral-900 uppercase">
-              DITSNDOTS CONTROL
+              DITSNDOTS ADMIN PANEL
             </h1>
-            <p className="text-xs text-neutral-400 font-mono tracking-widest uppercase mt-2">
-              ADMINISTRATIVE CONTROL PANEL
-            </p>
+
           </div>
 
           <form onSubmit={handleLoginSubmit} className="flex flex-col gap-5">
             <div>
               <label className="block text-[11px] font-mono font-bold tracking-widest text-neutral-500 uppercase mb-2">
-                ADMIN ACCESS PASSWORD
+                ADMIN EMAIL
               </label>
               <input
-                type="password"
-                placeholder="Enter password..."
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                type="email"
+                placeholder="admin@ditsndots.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-neutral-300 bg-neutral-50 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all font-semibold"
                 required
               />
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-mono font-bold tracking-widest text-neutral-500 uppercase mb-2">
+                ADMIN ACCESS PASSWORD
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password..."
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-4 pr-11 py-3 rounded-lg border border-neutral-300 bg-neutral-50 text-[15px] focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand transition-all font-semibold"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+                >
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {authError && (
@@ -312,35 +360,26 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-brand/20 selection:text-brand pb-20">
       {/* Admin Navbar */}
-      <header className="w-full border-b border-neutral-200/50 py-5 px-6 md:px-12 bg-white sticky top-0 z-40 shadow-sm">
-        <div className="max-w-[1400px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/logo.png"
-              alt="Dits N Dots logo"
-              className="w-8 h-8 object-contain"
-            />
-            <a href="/" className="text-lg font-black tracking-tight text-foreground">
-              DITS<span className="text-[#0082C8]">N</span>DOTS
+      <header className="w-full border-b border-neutral-200/50 py-4 sm:py-5 px-4 sm:px-6 md:px-12 bg-white sticky top-0 z-40 shadow-sm">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <a href="/" className="inline-flex items-center shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/logo/white%20logo.png"
+                alt="Dits N Dots"
+                className="h-14 sm:h-16 w-auto object-contain -my-2"
+              />
             </a>
-            <span className="text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase">
+            <span className="hidden sm:inline-block text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase shrink-0">
               CONTROL PANEL
             </span>
           </div>
 
-          <div className="flex items-center gap-5">
-            <a
-              href="/work"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs font-mono font-bold text-[#0082C8] hover:underline uppercase"
-            >
-              View /work Page &#8599;
-            </a>
+          <div className="flex items-center gap-4 shrink-0">
             <button
               onClick={handleLogout}
-              className="text-[13px] font-semibold text-neutral-500 hover:text-red-500 transition-colors uppercase cursor-pointer"
+              className="text-xs sm:text-[13px] font-semibold text-neutral-500 hover:text-red-500 transition-colors uppercase cursor-pointer"
             >
               Logout &rarr;
             </button>
@@ -349,10 +388,10 @@ export default function AdminPage() {
       </header>
 
       {/* Main Body Grid */}
-      <main className="max-w-[1400px] w-full mx-auto px-6 md:px-12 mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Tab Selection Sidebar */}
-        <aside className="lg:col-span-3 bg-white border border-neutral-200 rounded-2xl p-4 flex flex-col gap-1.5 shadow-sm">
-          <span className="text-[10px] font-mono font-bold tracking-[0.2em] text-neutral-400 uppercase p-2 block border-b border-neutral-100 mb-2">
+      <main className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 md:px-12 mt-6 sm:mt-12 grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
+        {/* Tab Selection Sidebar (horizontal scroll bar on mobile, vertical sidebar on desktop) */}
+        <aside className="lg:col-span-3 bg-white border border-neutral-200 rounded-2xl p-2.5 sm:p-4 flex flex-row lg:flex-col gap-1.5 shadow-sm overflow-x-auto lg:overflow-visible">
+          <span className="hidden lg:block text-[10px] font-mono font-bold tracking-[0.2em] text-neutral-400 uppercase p-2 border-b border-neutral-100 mb-2">
             SECTIONS LIST
           </span>
           {(["position", "work", "capabilities", "logos", "stats", "testimonials", "faq", "contact"] as Tab[]).map((tab) => {
@@ -366,61 +405,90 @@ export default function AdminPage() {
                   setIsEditing(false); // Discard editing status
                   setContent(JSON.parse(JSON.stringify(backupContent))); // Restore original content
                 }}
-                className={`w-full text-left px-4 py-3 rounded-lg text-sm font-semibold transition-all uppercase ${
-                  isActive
-                    ? "bg-brand text-white shadow-md shadow-brand/20 scale-[1.01]"
-                    : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-850"
-                }`}
+                className={`shrink-0 lg:w-full text-left px-3.5 lg:px-4 py-2.5 lg:py-3 rounded-lg text-xs lg:text-sm font-semibold transition-all uppercase whitespace-nowrap ${isActive
+                  ? "bg-brand text-white shadow-md shadow-brand/20 lg:scale-[1.01]"
+                  : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-850"
+                  }`}
               >
                 {tab === "position"
                   ? "Statement"
                   : tab === "work"
-                  ? "Work Page & Projects"
-                  : tab === "logos"
-                  ? "Trusted By Logos"
-                  : tab === "capabilities"
-                  ? "Our Services"
-                  : tab === "stats"
-                  ? "Key Stats"
-                  : tab === "testimonials"
-                  ? "Rating & Reviews"
-                  : tab === "faq"
-                  ? "Asked Often (FAQ)"
-                  : tab === "contact"
-                  ? "Let's Build (Contact)"
-                  : tab}
+                    ? "Work Page & Projects"
+                    : tab === "logos"
+                      ? "Trusted By Logos"
+                      : tab === "capabilities"
+                        ? "Our Services"
+                        : tab === "stats"
+                          ? "Key Stats"
+                          : tab === "testimonials"
+                            ? "Rating & Reviews"
+                            : tab === "faq"
+                              ? "Asked Often (FAQ)"
+                              : tab === "contact"
+                                ? "Let's Build (Contact)"
+                                : tab}
               </button>
             );
           })}
+
+          <div className="lg:border-t lg:border-neutral-100 lg:mt-2 lg:pt-2 shrink-0">
+            <button
+              onClick={() => {
+                setActiveTab("settings");
+                setSaveStatus({ message: "", type: "" });
+                setIsEditing(false);
+                if (backupContent) {
+                  setContent(JSON.parse(JSON.stringify(backupContent)));
+                }
+              }}
+              className={`shrink-0 lg:w-full text-left px-3.5 lg:px-4 py-2.5 lg:py-3 rounded-lg text-xs lg:text-sm font-semibold transition-all uppercase flex items-center justify-between gap-2 whitespace-nowrap ${activeTab === "settings"
+                ? "bg-brand text-white shadow-md shadow-brand/20 lg:scale-[1.01]"
+                : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-850"
+                }`}
+            >
+              <span>Settings</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+          </div>
         </aside>
 
         {/* Tab Workspace Form Area */}
-        <section className="lg:col-span-9 bg-white border border-neutral-200 rounded-2xl p-8 shadow-sm relative">
-          
+        <section className="lg:col-span-9 bg-white border border-neutral-200 rounded-2xl p-5 sm:p-8 shadow-sm relative">
+
           {/* Header row of tab details */}
-          <div className="flex items-center justify-between border-b border-neutral-100 pb-5 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-100 pb-5 mb-6 sm:mb-8">
             <div>
               <h2 className="text-xl font-black uppercase text-foreground leading-none">
-                EDIT {activeTab === "position"
-                  ? "Brand Statement"
-                  : activeTab === "work"
-                  ? "Work Page & Individual Projects"
-                  : activeTab === "capabilities"
-                  ? "Our Services"
-                  : activeTab === "logos"
-                  ? "Trusted By Logos"
-                  : activeTab === "stats"
-                  ? "Key Metrics"
-                  : activeTab === "testimonials"
-                  ? "Ratings & Reviews"
-                  : activeTab === "faq"
-                  ? "Asked Often (FAQ)"
-                  : activeTab === "contact"
-                  ? "Let's Build Section"
-                  : activeTab}
+                {activeTab === "settings"
+                  ? "Account Settings"
+                  : `EDIT ${activeTab === "position"
+                    ? "Brand Statement"
+                    : activeTab === "work"
+                      ? "Work Page & Individual Projects"
+                      : activeTab === "capabilities"
+                        ? "Our Services"
+                        : activeTab === "logos"
+                          ? "Trusted By Logos"
+                          : activeTab === "stats"
+                            ? "Key Metrics"
+                            : activeTab === "testimonials"
+                              ? "Ratings & Reviews"
+                              : activeTab === "faq"
+                                ? "Asked Often (FAQ)"
+                                : activeTab === "contact"
+                                  ? "Let's Build Section"
+                                  : activeTab
+                  }`}
               </h2>
               <p className="text-xs text-neutral-400 mt-1 font-mono uppercase tracking-wider">
-                {isEditing ? "Editing Mode — changes are unsaved" : "View Mode — content is locked"}
+                {activeTab === "settings"
+                  ? "Manage admin login email & password"
+                  : isEditing
+                    ? "Editing Mode — changes are unsaved"
+                    : "View Mode — content is locked"}
               </p>
             </div>
 
@@ -506,7 +574,7 @@ export default function AdminPage() {
                 >
                   + Add people
                 </Button>
-              ) : !isEditing ? (
+              ) : activeTab === "settings" ? null : !isEditing ? (
                 <Button
                   variant="secondary"
                   onClick={() => setIsEditing(true)}
@@ -521,11 +589,10 @@ export default function AdminPage() {
           {/* Toast/Notification Banner */}
           {saveStatus.message && (
             <div
-              className={`mb-6 p-4 rounded-xl border font-semibold text-sm flex items-center gap-2.5 transition-all ${
-                saveStatus.type === "success"
-                  ? "bg-green-50 text-green-700 border-green-200"
-                  : "bg-red-50 text-red-700 border-red-200"
-              }`}
+              className={`mb-6 p-4 rounded-xl border font-semibold text-sm flex items-center gap-2.5 transition-all ${saveStatus.type === "success"
+                ? "bg-green-50 text-green-700 border-green-200"
+                : "bg-red-50 text-red-700 border-red-200"
+                }`}
             >
               <div className={`w-2 h-2 rounded-full ${saveStatus.type === "success" ? "bg-green-500" : "bg-red-500"}`} />
               {saveStatus.message}
@@ -628,8 +695,23 @@ export default function AdminPage() {
             />
           )}
 
+          {activeTab === "settings" && (
+            <SettingsForm
+              apiBase={API_BASE}
+              currentEmail={email}
+              onCredentialsUpdated={(updatedEmail, updatedPassword) => {
+                setEmail(updatedEmail);
+                localStorage.setItem("admin_email", updatedEmail);
+                if (updatedPassword) {
+                  setPassword(updatedPassword);
+                  localStorage.setItem("admin_password", updatedPassword);
+                }
+              }}
+            />
+          )}
+
           {/* Footer Save Row */}
-          {isEditing && (
+          {isEditing && activeTab !== "settings" && (
             <div className="flex items-center justify-end border-t border-neutral-100 pt-6 mt-10 gap-3 animate-fade-in">
               <button
                 onClick={() => {

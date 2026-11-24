@@ -178,7 +178,7 @@ function LogoSilhouette({ logo }: { logo: LogoItem }) {
     );
   }
 
-  return <img src={src} alt={logo.name} draggable={false} style={shared} />;
+  return <img src={src} alt={logo.name} draggable={false} style={{ ...shared, mixBlendMode: "multiply" }} />;
 }
 
 interface LogoItem {
@@ -273,6 +273,7 @@ export default function TrustedByV2({ data, stats }: TrustedByV2Props) {
   return (
     <section
       data-reveal="1"
+      data-depth="1"
       data-screen-label="Trusted by"
       style={{
         borderBottom: `1px solid ${LINE}`,
@@ -280,7 +281,11 @@ export default function TrustedByV2({ data, stats }: TrustedByV2Props) {
         overflow: "hidden",
       }}
     >
-      <div data-depth-inner="1" style={{ width: "100%" }}>
+      <div
+        data-depth-inner="1"
+        data-trusted-inner="1"
+        style={{ width: "100%", willChange: "transform" }}
+      >
         <div style={{ textAlign: "center", padding: "0 clamp(18px,3.6vw,60px)", marginBottom: "clamp(48px,6.5vh,76px)" }}>
           <h2
             style={{

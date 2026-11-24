@@ -194,24 +194,7 @@ export default function WorkForm({
       )}
 
       {/* Info Banner explaining how Work Admin connects to Homepage, /work, and /work/[slug] */}
-      <div className="bg-neutral-50 border border-neutral-200/80 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold text-neutral-800 uppercase tracking-wide">
-            Work Page &amp; Individual Case Study Manager
-          </p>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Every project below powers the 3D Homepage Carousel, the 3-column <span className="font-mono font-bold text-brand">/work</span> catalog page (with centered category tabs), and its individual <span className="font-mono font-bold text-brand">/work/[slug]</span> case study page.
-          </p>
-        </div>
-        <a
-          href="/work"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs font-mono font-bold text-brand hover:underline uppercase shrink-0"
-        >
-          Preview /work Page &#8599;
-        </a>
-      </div>
+
 
       {/* Category Filter Bar (with inline Edit & Delete) + Add Project Button */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-100 pb-4">
@@ -222,8 +205,8 @@ export default function WorkForm({
             const count = isAll
               ? projectsList.length
               : projectsList.filter(
-                  (p) => (p.category || p.serviceType || "").trim().toLowerCase() === cat.toLowerCase()
-                ).length;
+                (p) => (p.category || p.serviceType || "").trim().toLowerCase() === cat.toLowerCase()
+              ).length;
 
             if (!isAll && editingCategory === cat) {
               return (
@@ -276,11 +259,10 @@ export default function WorkForm({
                   key={cat}
                   type="button"
                   onClick={() => setActiveCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                    active
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${active
                       ? "bg-brand text-white shadow-xs"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                  }`}
+                    }`}
                 >
                   All ({count})
                 </button>
@@ -290,11 +272,10 @@ export default function WorkForm({
             return (
               <div
                 key={cat}
-                className={`inline-flex items-center rounded-full text-xs font-bold transition-all ${
-                  active
+                className={`inline-flex items-center rounded-full text-xs font-bold transition-all ${active
                     ? "bg-brand text-white shadow-xs"
                     : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
-                }`}
+                  }`}
               >
                 <button
                   type="button"
@@ -307,11 +288,10 @@ export default function WorkForm({
                   type="button"
                   onClick={() => handleStartRenameCategory(cat)}
                   title={`Rename "${cat}"`}
-                  className={`p-1 rounded-full transition-colors cursor-pointer ${
-                    active
+                  className={`p-1 rounded-full transition-colors cursor-pointer ${active
                       ? "text-white/80 hover:text-white hover:bg-white/15"
                       : "text-neutral-400 hover:text-brand hover:bg-white"
-                  }`}
+                    }`}
                 >
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 20h9" />
@@ -322,11 +302,10 @@ export default function WorkForm({
                   type="button"
                   onClick={() => handleDeleteCategory(cat)}
                   title={`Delete "${cat}"`}
-                  className={`p-1 mr-1 rounded-full transition-colors cursor-pointer ${
-                    active
+                  className={`p-1 mr-1 rounded-full transition-colors cursor-pointer ${active
                       ? "text-white/80 hover:text-white hover:bg-white/15"
                       : "text-neutral-400 hover:text-red-500 hover:bg-white"
-                  }`}
+                    }`}
                 >
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18" />
@@ -383,11 +362,10 @@ export default function WorkForm({
           return (
             <div
               key={`${project.id ?? "new"}-${index}`}
-              className={`border rounded-2xl overflow-hidden flex flex-col justify-between transition-all bg-white ${
-                project.isBookmarked
+              className={`border rounded-2xl overflow-hidden flex flex-col justify-between transition-all bg-white ${project.isBookmarked
                   ? "border-amber-300 ring-1 ring-amber-200/60"
                   : "border-neutral-200/90 hover:border-neutral-300 shadow-xs"
-              }`}
+                }`}
             >
               {/* Top Image Preview */}
               <div>
@@ -475,11 +453,10 @@ export default function WorkForm({
                   <button
                     type="button"
                     onClick={() => toggleBookmark(index)}
-                    className={`p-1.5 rounded-lg border text-xs font-bold cursor-pointer transition-colors ${
-                      project.isBookmarked
+                    className={`p-1.5 rounded-lg border text-xs font-bold cursor-pointer transition-colors ${project.isBookmarked
                         ? "bg-amber-500 border-amber-500 text-white"
                         : "bg-white border-neutral-200 text-neutral-400 hover:text-amber-500"
-                    }`}
+                      }`}
                     title={project.isBookmarked ? "Unpin featured project" : "Pin project to top"}
                   >
                     ★

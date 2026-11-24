@@ -193,11 +193,6 @@ export default function CapabilitiesForm({ data, onChange, onStartEditing, onAdd
                       {pillar.description}
                     </p>
                   )}
-                  {pillar.tag && (
-                    <p className="text-[11px] font-mono text-brand mt-0.5">
-                      Tags: {pillar.tag}
-                    </p>
-                  )}
                 </div>
               </div>
 

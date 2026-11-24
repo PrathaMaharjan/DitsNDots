@@ -294,44 +294,8 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
     }
 
     // ---------- Scroll-driven motion ----------
-    // The hero's own motion lives in ParallaxLayersV2 (GSAP/ScrollTrigger),
-    // not here — this pass covers the sections below it.
-    const nav = q<HTMLElement>("[data-nav]");
-
-    // Sections that sit under the nav as dark or photographic ground. Anything
-    // unmarked is treated as the page's cream default.
-    const toneSections = qa<HTMLElement>("[data-nav-tone]");
-    // Sampled at the nav's own vertical midline rather than the viewport top,
-    // so the swap lands as the bar crosses the boundary, not before it.
-    const NAV_MIDLINE = 46;
-    let lastTone = "";
-
-    const applyTone = () => {
-      if (!nav) return;
-      let tone = "light";
-      for (let i = toneSections.length - 1; i >= 0; i--) {
-        const section = toneSections[i];
-        const r = section.getBoundingClientRect();
-        if (r.top <= NAV_MIDLINE && r.bottom >= NAV_MIDLINE) {
-          tone = section.dataset.navTone || "light";
-          break;
-        }
-      }
-      if (tone === lastTone) return;
-      lastTone = tone;
-      const dark = tone === "dark";
-      nav.style.setProperty("--nav-fg", dark ? "#F7F6F3" : "#0E0E0E");
-      nav.style.setProperty("--nav-pill-bg", dark ? "#F7F6F3" : "#0E0E0E");
-      nav.style.setProperty("--nav-pill-fg", dark ? "#0E0E0E" : "#F7F6F3");
-      // The client-login chip is a translucent scrim rather than a solid
-      // fill, so it does NOT invert the way the pills do — it stays a dark
-      // veil with light type on photographic/dark ground, and flips to a
-      // light veil with dark type on the cream page. Reusing --nav-pill-fg
-      // here would put near-black text on the dark veil over the hero.
-      nav.style.setProperty("--nav-login-bg", dark ? "rgba(14,14,14,.42)" : "rgba(14,14,14,.06)");
-      nav.style.setProperty("--nav-login-fg", dark ? "#F7F6F3" : "#0E0E0E");
-    };
-
+    // Nav tone & hide-on-scroll are owned exclusively by NavV2.tsx so there are
+    // never two competing scroll listeners mutating the navbar on every frame.
     const revealSec = q<HTMLElement>("[data-reveal-sec]");
     const words = qa<HTMLElement>("[data-rw]");
     const workSec = q<HTMLElement>("[data-work-sec]");
@@ -342,8 +306,6 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
     const fill = q<HTMLElement>("[data-proc-fill]");
     const steps = qa<HTMLElement>("[data-step]");
     const wordmark = q<HTMLElement>("[data-wordmark]");
-    let lastY = window.scrollY;
-    let hidden = false;
 
     const prog = (el: HTMLElement) => {
       const r = el.getBoundingClientRect();
@@ -352,21 +314,7 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
     };
 
     const tick = () => {
-      const y = window.scrollY;
       const vh = window.innerHeight;
-      applyTone();
-      if (nav && !menuIsOpen()) {
-        if (y > lastY && y > 220) {
-          if (!hidden) {
-            nav.style.transform = "translate3d(0,-120%,0)";
-            hidden = true;
-          }
-        } else if (hidden) {
-          nav.style.transform = "translate3d(0,0,0)";
-          hidden = false;
-        }
-      }
-      lastY = y;
 
       if (revealSec && words.length) {
         const p = prog(revealSec) * 1.18;

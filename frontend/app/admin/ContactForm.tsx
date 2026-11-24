@@ -25,14 +25,7 @@ export default function ContactForm({
 }: ContactFormProps) {
   return (
     <div className="flex flex-col gap-6">
-      <div className="bg-neutral-50 border border-neutral-200/80 rounded-xl p-4 text-xs text-neutral-500">
-        <p className="font-bold text-neutral-800 uppercase tracking-wide mb-0.5">
-          Let&apos;s Build Section &amp; Contact Info
-        </p>
-        <p>
-          Controls the <span className="font-semibold text-neutral-700">&ldquo;Let&apos;s Build Something Extraordinary.&rdquo;</span> banner on the Homepage, <span className="font-mono font-bold text-brand">/work</span>, and <span className="font-mono font-bold text-brand">/work/[slug]</span> pages.
-        </p>
-      </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>

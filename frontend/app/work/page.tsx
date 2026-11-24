@@ -87,9 +87,9 @@ export default function WorkPage() {
         "--ab-bg": "#F7F6F3",
         "--ab-ink": "#0E0E0E",
         "--ab-card": "#EAE9E4",
-        "--ab-ink-deep": "#02AA7A",
+        "--ab-ink-deep": "#0082C8",
         fontFamily: bodyFont,
-        background: "#02AA7A",
+        background: "#0082C8",
         color: "#0E0E0E",
         minHeight: "100vh",
       } as React.CSSProperties}
@@ -238,6 +238,16 @@ export default function WorkPage() {
           .ab-work-grid {
             grid-template-columns: minmax(0, 1fr);
           }
+          .ab-work-filter-bar {
+            gap: 10px 18px;
+            padding: 4px 16px 16px;
+          }
+          .ab-work-filter-pill {
+            font-size: 13.5px;
+          }
+          .ab-work-card-body {
+            padding: 18px 18px 16px;
+          }
         }
       `}</style>
 
@@ -258,7 +268,6 @@ export default function WorkPage() {
             data-light-sheet="1"
             data-light-sheet-top="flat"
             data-nav-tone="light"
-            className="ab-sheet-rise"
             style={{
               position: "relative",
               zIndex: 5,

@@ -309,10 +309,6 @@ export function AdminSkeleton() {
       className="ab-skel-fade"
       style={{ maxWidth: 1400, margin: "3rem auto 0", padding: "0 1.5rem", width: "100%" }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <SkeletonPulse />
-        <span className="ab-skel-eyebrow">Fetching panel configuration…</span>
-      </div>
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 24 }} className="ab-skel-admin">
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (

@@ -150,6 +150,7 @@ export default function HeroV2({ statement }: HeroV2Props) {
   return (
     <div className="parallax" ref={rootRef} data-screen-label="Hero">
       <section className="parallax__header" data-nav-tone="light">
+        <div className="parallax__nav-blur" aria-hidden="true" />
         <div className="parallax__visuals">
           <div className="parallax__black-line-overflow" />
           <div data-parallax-layers className="parallax__layers">

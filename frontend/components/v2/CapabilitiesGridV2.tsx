@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { displayFont } from "./tokens";
 import SectionHeading from "./SectionHeading";
+import GreenWavePattern from "./GreenWavePattern";
 import {
   CREAM,
   Capability,
@@ -30,102 +31,118 @@ function StackCard({
 }) {
   // Alternating dark / cream cards just like the Huge Careers stack
   const isLightCard = index % 2 === 1;
-  const bg = isLightCard ? "#F5F3EE" : "#111111";
-  const fg = isLightCard ? "#0E0E0E" : "#F7F6F3";
-  const subFg = isLightCard ? "rgba(14, 14, 14, 0.66)" : "rgba(247, 246, 243, 0.68)";
+  const hasImage = Boolean(item.image);
+  const bg = hasImage ? "#111111" : isLightCard ? "#F5F3EE" : "#111111";
+  const fg = hasImage ? "#FFFFFF" : isLightCard ? "#0E0E0E" : "#F7F6F3";
+  const subFg = hasImage
+    ? "rgba(255, 255, 255, 0.82)"
+    : isLightCard
+    ? "rgba(14, 14, 14, 0.66)"
+    : "rgba(247, 246, 243, 0.68)";
   const accentColor = isLightCard ? "#0082C8" : "#38BDF8";
-  const border = isLightCard
-    ? "1px solid rgba(14, 14, 14, 0.1)"
-    : "1px solid rgba(247, 246, 243, 0.14)";
 
   return (
     <div
       ref={cardRef}
+      className="ab-service-card-wrap"
       style={{
         position: "absolute",
         top: 0,
         left: 0,
-        width: "clamp(260px, 26vw, 370px)",
-        height: "clamp(380px, 56vh, 510px)",
-        borderRadius: 22,
-        background: bg,
-        color: fg,
-        border,
-        boxShadow: isLightCard
-          ? "-18px 24px 58px rgba(0, 0, 0, 0.42)"
-          : "-20px 26px 64px rgba(0, 0, 0, 0.62)",
-        padding: "clamp(26px, 2.6vw, 38px)",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        overflow: "hidden",
+        width: "min(370px, max(255px, 26vw), calc(100vw - 44px))",
+        height: "clamp(340px, 52vh, 510px)",
         willChange: "transform",
         userSelect: "none",
       }}
     >
-      {/* Optional CMS background image if uploaded in admin */}
-      {item.image && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={item.image}
-          alt={item.title}
-          loading="lazy"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            opacity: 1,
-            pointerEvents: "none",
-          }}
-        />
-      )}
+      <div
+        className="ab-service-card-inner"
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
+          borderRadius: 22,
+          background: bg,
+          color: fg,
+          border: "none",
+          boxShadow: isLightCard
+            ? "-18px 24px 58px rgba(0, 0, 0, 0.42)"
+            : "-20px 26px 64px rgba(0, 0, 0, 0.62)",
+          padding: "clamp(26px, 2.6vw, 38px)",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          overflow: "hidden",
+        }}
+      >
+        {/* Optional CMS background image + subtle dimming scrim so text stays legible */}
+        {item.image && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={item.image}
+              alt={item.title}
+              loading="lazy"
+              className="ab-service-card-img"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                opacity: 1,
+                pointerEvents: "none",
+              }}
+            />
+            <div
+              aria-hidden="true"
+              className="ab-service-card-scrim"
+              style={{
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(180deg, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.38) 100%)",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            />
+          </>
+        )}
 
-      {/* Top Header: Title */}
-      <div style={{ position: "relative", zIndex: 2 }}>
-        <h3
-          style={{
-            margin: 0,
-            fontFamily: displayFont,
-            fontWeight: 700,
-            fontSize: "clamp(26px, 2.35vw, 36px)",
-            lineHeight: 1.05,
-            letterSpacing: "-.035em",
-            color: fg,
-          }}
+        {/* Top Header: Title */}
+        <div style={{ position: "relative", zIndex: 2 }}>
+          <h3
+            style={{
+              margin: 0,
+              fontFamily: displayFont,
+              fontWeight: 700,
+              fontSize: "clamp(26px, 2.35vw, 36px)",
+              lineHeight: 1.05,
+              letterSpacing: "-.035em",
+              color: fg,
+            }}
+          >
+            {item.title.charAt(0).toUpperCase() + item.title.slice(1).toLowerCase()}.
+          </h3>
+        </div>
+
+        {/* Bottom Copy: Lead description (revealed smoothly on hover) */}
+        <div
+          className="ab-service-card-details"
+          style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 14 }}
         >
-          {item.title.charAt(0).toUpperCase() + item.title.slice(1).toLowerCase()}.
-        </h3>
-      </div>
-
-      {/* Bottom Copy: Lead description + tags (matching Huge's bottom-anchored layout) */}
-      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: 14 }}>
-        <p
-          style={{
-            margin: 0,
-            fontSize: "clamp(14px, 1.05vw, 16px)",
-            fontWeight: 600,
-            lineHeight: 1.48,
-            color: fg,
-          }}
-        >
-          {item.description}
-        </p>
-
-        {item.tags.length > 0 && (
           <p
             style={{
               margin: 0,
-              fontSize: "clamp(12.5px, 0.92vw, 14px)",
-              fontWeight: 500,
-              lineHeight: 1.45,
-              color: subFg,
+              fontSize: "clamp(14px, 1.05vw, 16px)",
+              fontWeight: 600,
+              lineHeight: 1.48,
+              color: fg,
             }}
           >
-            {item.tags.join(" · ")}
+            {item.description}
           </p>
-        )}
+        </div>
       </div>
     </div>
   );
@@ -137,8 +154,21 @@ export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
   const deckRef = useRef<HTMLDivElement | null>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const bgTextRef = useRef<HTMLDivElement | null>(null);
+  const mobileTrackRef = useRef<HTMLDivElement | null>(null);
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileIndex, setMobileIndex] = useState(0);
 
   useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
     const runway = runwayRef.current;
     const deck = deckRef.current;
     if (!runway || !deck || !items.length) return;
@@ -165,8 +195,8 @@ export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
       const rect = runway.getBoundingClientRect();
       const vh = window.innerHeight;
       const scrollable = Math.max(1, rect.height - vh);
-      // Start rising Card 0 right as the section locks near the top
-      targetProgress = clamp((-rect.top + vh * 0.18) / (scrollable + vh * 0.12), 0, 1);
+      // Start rising Card 0 early as Our Services enters the viewport so the left side isn't empty
+      targetProgress = clamp((-rect.top + vh * 0.52) / (scrollable + vh * 0.42), 0, 1);
       if (!initialized) {
         currentProgress = targetProgress;
         initialized = true;
@@ -208,6 +238,14 @@ export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
       for (let i = 0; i < count; i++) {
         const segStart = i * (span * overlap);
         cardT[i] = clamp((stackProgress - segStart) / span, 0, 1);
+      }
+
+      // Only allow hover pop-up once ALL cards have finished rising into place
+      const allCardsUp = count > 0 && cardT[count - 1] >= 0.96;
+      if (allCardsUp) {
+        if (deck.dataset.deckReady !== "1") deck.dataset.deckReady = "1";
+      } else if (deck.dataset.deckReady === "1") {
+        delete deck.dataset.deckReady;
       }
 
       for (let i = 0; i < count; i++) {
@@ -268,9 +306,280 @@ export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
       window.removeEventListener("resize", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [items.length]);
+  }, [items.length, isMobile]);
 
   if (!items.length) return null;
+
+  const scrollMobileTo = (idx: number) => {
+    const track = mobileTrackRef.current;
+    if (!track) return;
+    const clamped = Math.max(0, Math.min(items.length - 1, idx));
+    const slide = track.children[clamped] as HTMLElement | undefined;
+    if (slide) {
+      slide.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+    setMobileIndex(clamped);
+  };
+
+  const handleMobileScroll = () => {
+    const track = mobileTrackRef.current;
+    if (!track) return;
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let closest = 0;
+    let bestDist = Infinity;
+    Array.from(track.children).forEach((child, i) => {
+      const el = child as HTMLElement;
+      const elCenter = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(elCenter - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        closest = i;
+      }
+    });
+    setMobileIndex(closest);
+  };
+
+  if (isMobile) {
+    return (
+      <section
+        id="capabilities-grid"
+        data-reveal="1"
+        data-screen-label="Capabilities"
+        data-nav-tone="dark"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          background: "#0082C8",
+          color: CREAM,
+          padding: "52px 0 128px",
+          overflow: "hidden",
+        }}
+      >
+        <GreenWavePattern flip />
+        <style>{`
+          .ab-mobile-srv-track {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            padding: 8px 9vw 18px;
+          }
+          .ab-mobile-srv-track::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+
+        <div style={{ position: "relative", zIndex: 2 }}>
+          {/* Centered Mobile Header */}
+          <div style={{ textAlign: "center", padding: "0 20px 28px" }}>
+            <h2
+              style={{
+                fontFamily: displayFont,
+                fontWeight: 700,
+                fontSize: "clamp(38px, 11vw, 54px)",
+                lineHeight: 0.96,
+                letterSpacing: "-.04em",
+                margin: "0 0 14px",
+                color: "#FFFFFF",
+              }}
+            >
+              <SectionHeading tone="dark" accent={1}>
+                Our services
+              </SectionHeading>
+            </h2>
+            <p
+              style={{
+                margin: "0 auto",
+                fontSize: 15,
+                fontWeight: 600,
+                lineHeight: 1.55,
+                color: "rgba(255, 255, 255, 0.9)",
+                maxWidth: "32ch",
+              }}
+            >
+              Five disciplines, one team — from first sketch through launch, and sharp long after.
+            </p>
+          </div>
+
+          {/* Swipeable Horizontal Carousel Track */}
+          <div
+            ref={mobileTrackRef}
+            onScroll={handleMobileScroll}
+            className="ab-mobile-srv-track"
+          >
+            {items.map((item, idx) => {
+              const hasImage = Boolean(item.image);
+              const isLight = idx % 2 === 1;
+              const bg = hasImage ? "#111111" : isLight ? "#F5F3EE" : "#111111";
+              const fg = hasImage ? "#FFFFFF" : isLight ? "#0E0E0E" : "#F7F6F3";
+
+              return (
+                <div
+                  key={item.key}
+                  style={{
+                    flex: "0 0 82vw",
+                    maxWidth: 340,
+                    height: 400,
+                    scrollSnapAlign: "center",
+                    position: "relative",
+                    borderRadius: 22,
+                    background: bg,
+                    color: fg,
+                    overflow: "hidden",
+                    padding: 26,
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    boxShadow: "0 20px 44px rgba(0, 24, 48, 0.34)",
+                  }}
+                >
+                  {item.image && (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        loading="lazy"
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          filter: "brightness(0.76) saturate(1.15)",
+                          pointerEvents: "none",
+                        }}
+                      />
+                      <div
+                        aria-hidden="true"
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          background:
+                            "linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.08) 45%, rgba(0,0,0,0.62) 100%)",
+                          pointerEvents: "none",
+                        }}
+                      />
+                    </>
+                  )}
+
+                  <h3
+                    style={{
+                      position: "relative",
+                      zIndex: 2,
+                      margin: 0,
+                      fontFamily: displayFont,
+                      fontWeight: 700,
+                      fontSize: 28,
+                      lineHeight: 1.06,
+                      letterSpacing: "-.035em",
+                      color: fg,
+                    }}
+                  >
+                    {item.title.charAt(0).toUpperCase() + item.title.slice(1).toLowerCase()}.
+                  </h3>
+
+                  <p
+                    style={{
+                      position: "relative",
+                      zIndex: 2,
+                      margin: 0,
+                      fontSize: 14.5,
+                      fontWeight: 600,
+                      lineHeight: 1.5,
+                      color: fg,
+                    }}
+                  >
+                    {item.description}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Mobile Controls: Prev Arrow | Dots | Next Arrow */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 18,
+              marginTop: 14,
+              padding: "0 20px",
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => scrollMobileTo(mobileIndex - 1)}
+              disabled={mobileIndex === 0}
+              aria-label="Previous service"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 999,
+                border: "1px solid rgba(255, 255, 255, 0.36)",
+                background: "rgba(11, 17, 26, 0.2)",
+                color: "#FFFFFF",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: mobileIndex === 0 ? 0.35 : 1,
+                cursor: mobileIndex === 0 ? "default" : "pointer",
+              }}
+            >
+              &larr;
+            </button>
+
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 7 }}>
+              {items.map((item, i) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  aria-label={`Go to ${item.title}`}
+                  onClick={() => scrollMobileTo(i)}
+                  style={{
+                    width: i === mobileIndex ? 22 : 7,
+                    height: 7,
+                    padding: 0,
+                    border: "none",
+                    borderRadius: 999,
+                    background:
+                      i === mobileIndex ? "#FFFFFF" : "rgba(255, 255, 255, 0.38)",
+                    transition: "width 0.25s ease, background 0.25s ease",
+                    cursor: "pointer",
+                  }}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => scrollMobileTo(mobileIndex + 1)}
+              disabled={mobileIndex === items.length - 1}
+              aria-label="Next service"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 999,
+                border: "1px solid rgba(255, 255, 255, 0.36)",
+                background: "rgba(11, 17, 26, 0.2)",
+                color: "#FFFFFF",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                opacity: mobileIndex === items.length - 1 ? 0.35 : 1,
+                cursor: mobileIndex === items.length - 1 ? "default" : "pointer",
+              }}
+            >
+              &rarr;
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -285,11 +594,63 @@ export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
         zIndex: 1,
         // Tall scroll runway so each of the 5 cards stacks one-by-one as you scroll
         height: `${Math.max(280, items.length * 68)}vh`,
-        background: "#02AA7A",
+        background: "#0082C8",
         color: CREAM,
       }}
     >
       {/* Sticky viewport stage holding the background headline and the stacking card deck */}
+      <style>{`
+        .ab-service-card-inner {
+          transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                      box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+          will-change: transform;
+        }
+        .ab-service-card-img {
+          filter: brightness(0.76) saturate(1.18);
+          transition: filter 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+                      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .ab-service-card-scrim {
+          opacity: 1;
+          transition: opacity 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .ab-service-card-details {
+          opacity: 0;
+          transform: translate3d(0, 14px, 0);
+          pointer-events: none;
+          transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                      transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        [data-deck-ready="1"] .ab-service-card-wrap {
+          cursor: pointer;
+        }
+        [data-deck-ready="1"] .ab-service-card-wrap:hover {
+          z-index: 60 !important;
+        }
+        [data-deck-ready="1"] .ab-service-card-wrap:hover .ab-service-card-inner {
+          transform: translate3d(0, -28px, 0) scale(1.05);
+          box-shadow: 0 36px 84px rgba(0, 22, 44, 0.55) !important;
+        }
+        [data-deck-ready="1"] .ab-service-card-wrap:hover .ab-service-card-img {
+          filter: brightness(1) saturate(1.12);
+          transform: scale(1.03);
+        }
+        [data-deck-ready="1"] .ab-service-card-wrap:hover .ab-service-card-scrim {
+          opacity: 0.72;
+        }
+        [data-deck-ready="1"] .ab-service-card-wrap:hover .ab-service-card-details {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+          pointer-events: auto;
+        }
+        @media (hover: none) {
+          .ab-service-card-details {
+            opacity: 1;
+            transform: none;
+            pointer-events: auto;
+          }
+        }
+      `}</style>
       <div
         style={{
           position: "sticky",
@@ -303,6 +664,7 @@ export default function CapabilitiesGridV2({ data }: CapabilitiesGridV2Props) {
           padding: "clamp(40px, 6vh, 80px) clamp(18px, 3.6vw, 60px)",
         }}
       >
+        <GreenWavePattern flip />
         <div
           data-cap-inner="1"
           style={{

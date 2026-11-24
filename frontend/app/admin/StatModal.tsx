@@ -20,7 +20,6 @@ interface StatModalProps {
 export default function StatModal({ stat, onSave, onClose }: StatModalProps) {
   const [value, setValue] = useState<number>(0);
   const [suffix, setSuffix] = useState("");
-  const [display, setDisplay] = useState("");
   const [label, setLabel] = useState("");
   const [error, setError] = useState("");
 
@@ -28,12 +27,10 @@ export default function StatModal({ stat, onSave, onClose }: StatModalProps) {
     if (stat) {
       setValue(stat.value ?? 0);
       setSuffix(stat.suffix || "");
-      setDisplay(stat.display || "");
       setLabel(stat.label || "");
     } else {
       setValue(0);
       setSuffix("+");
-      setDisplay("");
       setLabel("");
     }
   }, [stat]);
@@ -49,7 +46,7 @@ export default function StatModal({ stat, onSave, onClose }: StatModalProps) {
       ...(stat?.id ? { id: stat.id } : {}),
       value: Number(value) || 0,
       suffix: suffix.trim(),
-      display: display.trim(),
+      display: "",
       label: label.trim(),
     });
   };
@@ -63,7 +60,7 @@ export default function StatModal({ stat, onSave, onClose }: StatModalProps) {
               {stat ? "Edit Stat / Metric" : "Add Stat / Metric"}
             </h3>
             <p className="text-xs text-neutral-400 font-mono uppercase mt-1">
-              {stat ? "Modify counter or custom glyph" : "Create a new metric counter for the proof section"}
+              {stat ? "Modify metric counter" : "Create a new metric counter for the proof section"}
             </p>
           </div>
           <button
@@ -106,22 +103,6 @@ export default function StatModal({ stat, onSave, onClose }: StatModalProps) {
                 className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-mono font-bold tracking-widest text-neutral-500 uppercase mb-2">
-              Custom Display Glyph (Optional)
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. ∞ (overrides number count-up)"
-              value={display}
-              onChange={(e) => setDisplay(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand/40 focus:border-brand"
-            />
-            <p className="text-[11px] text-neutral-400 mt-1 font-sans">
-              Leave blank to animate counting up from 0 to the numeric value.
-            </p>
           </div>
 
           <div>

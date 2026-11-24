@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { displayFont } from "./tokens";
 import { SkillPill } from "./SkillsPhysics";
 import { getLenis } from "../../lib/v2/useLenis";
@@ -18,6 +19,8 @@ export interface ContactData {
 interface ContactV2Props {
   data?: ContactData;
 }
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 const PROJECT_TYPES = [
   "Web Development",
@@ -48,10 +51,17 @@ export default function ContactV2({ data }: ContactV2Props) {
   const [emailAddress, setEmailAddress] = useState("");
   const [projectType, setProjectType] = useState("Digital Marketing");
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const onOpenSheet = () => setSheetOpen(true);
+    window.addEventListener("ditsndots:open-project-sheet", onOpenSheet);
+    return () => {
+      window.removeEventListener("ditsndots:open-project-sheet", onOpenSheet);
+    };
   }, []);
 
   // Lock background page scroll and drive ultra-smooth GPU-composited scroll expansion (0 -> 1)
@@ -245,16 +255,43 @@ export default function ContactV2({ data }: ContactV2Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [sheetOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setSheetOpen(false);
-      setFullName("");
-      setEmailAddress("");
-      setMessage("");
-    }, 1800);
+    if (isSending) return;
+    setSubmitError("");
+    setIsSending(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/contact/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          emailAddress: emailAddress.trim(),
+          projectType,
+          message: message.trim(),
+        }),
+      });
+
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSubmitError(resData.error || "Failed to send message. Please try again.");
+        return;
+      }
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setSheetOpen(false);
+        setFullName("");
+        setEmailAddress("");
+        setMessage("");
+      }, 2200);
+    } catch {
+      setSubmitError("Could not reach the server. Please make sure the backend is running.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -287,17 +324,25 @@ export default function ContactV2({ data }: ContactV2Props) {
           padding: "clamp(56px, 9vh, 110px) clamp(56px, 7vw, 120px)",
         }}
       >
-        {/* Atmospheric background image */}
+        {/* Atmospheric background image (optimized & preloaded via next/image) */}
         <div
           aria-hidden="true"
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage: 'url("/images/our_works_bg.png")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            pointerEvents: "none",
           }}
-        />
+        >
+          <Image
+            src="/images/our_works_bg.png"
+            alt=""
+            fill
+            sizes="100vw"
+            quality={80}
+            priority
+            style={{ objectFit: "cover", objectPosition: "center" }}
+          />
+        </div>
 
         {/* Subtle scrim so the background artwork stays clearly visible */}
         <div
@@ -597,11 +642,17 @@ export default function ContactV2({ data }: ContactV2Props) {
                 transform: translateY(-2px);
               }
               @media (max-width: 680px) {
+                .ab-humaan-card {
+                  border-radius: 28px 28px 0 0;
+                  padding: 36px 20px 64px;
+                }
                 .ab-project-grid-2 {
                   grid-template-columns: 1fr;
                 }
                 .ab-project-close {
                   margin-right: 0;
+                  margin-top: -8px;
+                  top: 16px;
                 }
               }
             `}</style>
@@ -676,10 +727,10 @@ export default function ContactV2({ data }: ContactV2Props) {
                           marginBottom: 8,
                         }}
                       >
-                        Message Sent!
+                        We&apos;ve got your message!
                       </div>
                       <p style={{ margin: 0, fontSize: 15, color: "#5C5C58" }}>
-                        Thanks for reaching out — our team will get back to you within one business day.
+                        Thanks for reaching out to Dits and Dots. We&apos;ve received your inquiry and will be in touch soon.
                       </p>
                     </div>
                   ) : (
@@ -700,7 +751,7 @@ export default function ContactV2({ data }: ContactV2Props) {
                             id="proj-full-name"
                             type="text"
                             required
-                            placeholder="John Doe"
+                            placeholder="Your full name"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                             className="ab-project-input"
@@ -715,7 +766,7 @@ export default function ContactV2({ data }: ContactV2Props) {
                             id="proj-email"
                             type="email"
                             required
-                            placeholder="john@example.com"
+                            placeholder="you@company.com"
                             value={emailAddress}
                             onChange={(e) => setEmailAddress(e.target.value)}
                             className="ab-project-input"
@@ -757,21 +808,47 @@ export default function ContactV2({ data }: ContactV2Props) {
                         />
                       </div>
 
-                      <button type="submit" className="ab-project-submit">
-                        <span>Send Message</span>
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.1"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                      {submitError && (
+                        <div
+                          style={{
+                            padding: "12px 16px",
+                            borderRadius: 12,
+                            background: "#FEF2F2",
+                            border: "1px solid #FECACA",
+                            color: "#B91C1C",
+                            fontSize: 13.5,
+                            fontWeight: 600,
+                          }}
                         >
-                          <line x1="22" y1="2" x2="11" y2="13" />
-                          <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                        </svg>
+                          {submitError}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={isSending}
+                        className="ab-project-submit"
+                        style={{
+                          opacity: isSending ? 0.72 : 1,
+                          cursor: isSending ? "not-allowed" : "pointer",
+                        }}
+                      >
+                        <span>{isSending ? "Sending..." : "Send Message"}</span>
+                        {!isSending && (
+                          <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.1"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="22" y1="2" x2="11" y2="13" />
+                            <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                          </svg>
+                        )}
                       </button>
                     </form>
                   )}
