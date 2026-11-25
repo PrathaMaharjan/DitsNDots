@@ -102,7 +102,6 @@
   margin-bottom: -130px;
   background-color: #F7F6F3;
   border-radius: 0 0 48px 48px;
-  will-change: margin, border-radius;
 }
 
 .parallax__statement-sticky {
@@ -169,6 +168,10 @@
 /* Fills the layers frame exactly; all the overscan now lives on
    .parallax__visuals so there is a single knob for how much the plates
    are zoomed. */
+.parallax__layer-picture {
+  display: contents;
+}
+
 .parallax__layer-img {
   pointer-events: none;
   object-fit: cover;
@@ -178,6 +181,10 @@
   position: absolute;
   top: 0;
   left: 0;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .parallax__layer-title {
@@ -194,6 +201,10 @@
      instead of being covered by it. This trades away the Osmo-style depth
      moment where the foreground crosses over the type. */
   z-index: 10;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .parallax__title {
@@ -208,6 +219,34 @@
   font-weight: 800;
   line-height: 1;
   position: relative;
+}
+
+@media (max-width: 768px) {
+  .parallax {
+    --parallax-overscan: 1.02;
+  }
+  .parallax__layer-picture--desktop-only,
+  .parallax__layer-img--desktop-only {
+    display: none !important;
+  }
+  /* Avoid expensive per-frame backdrop-filter + alpha-mask GPU readback over
+     moving full-screen parallax textures on mobile browsers. */
+  .parallax__nav-blur {
+    height: 110px;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(247, 246, 243, 0.72) 0%,
+      rgba(247, 246, 243, 0.34) 55%,
+      rgba(247, 246, 243, 0) 100%
+    );
+  }
+  .parallax__layer-img {
+    object-position: center bottom;
+  }
 }
 
 @media (max-width: 640px) {

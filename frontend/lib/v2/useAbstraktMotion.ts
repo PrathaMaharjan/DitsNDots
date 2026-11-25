@@ -317,58 +317,70 @@ export function useAbstraktMotion(rootRef: React.RefObject<HTMLElement | null>, 
       const vh = window.innerHeight;
 
       if (revealSec && words.length) {
-        const p = prog(revealSec) * 1.18;
-        const n = words.length;
-        // Unlit floor. The statement runs on a dark field, where 0.14 — the
-        // value this used while the section was cream — leaves the words a
-        // reader has not reached yet effectively invisible, so the sentence
-        // reads as blank space rather than as copy waiting to light. Kept
-        // here rather than as an inline style because this loop rewrites
-        // opacity on every tick and would overwrite one.
-        const floor = 0.26;
-        for (let i = 0; i < n; i++) {
-          const s = i / n;
-          const e = (i + 2.2) / n;
-          words[i].style.opacity = String(floor + (1 - floor) * clamp((p - s) / (e - s), 0, 1));
+        const rr = revealSec.getBoundingClientRect();
+        if (rr.top < vh * 1.15 && rr.bottom > -vh * 0.25) {
+          const d = rr.height - vh;
+          const rawP = d <= 0 ? clamp(1 - rr.bottom / vh, 0, 1) : clamp(-rr.top / d, 0, 1);
+          const p = rawP * 1.18;
+          const n = words.length;
+          const floor = 0.26;
+          for (let i = 0; i < n; i++) {
+            const s = i / n;
+            const e = (i + 2.2) / n;
+            words[i].style.opacity = String(floor + (1 - floor) * clamp((p - s) / (e - s), 0, 1));
+          }
         }
       }
       if (workSec && track) {
-        const p = prog(workSec);
-        const max = Math.max(0, track.scrollWidth - window.innerWidth);
-        track.style.transform = "translate3d(" + -p * max + "px,0,0)";
-        if (bar) bar.style.width = p * 100 + "%";
-      }
-      caps.forEach((card, i) => {
-        const next = caps[i + 1];
-        if (!next) {
-          card.style.transform = "none";
-          card.style.filter = "none";
-          return;
+        const wr = workSec.getBoundingClientRect();
+        if (wr.top < vh * 1.1 && wr.bottom > -vh * 0.1) {
+          const d = wr.height - vh;
+          const p = d <= 0 ? clamp(1 - wr.bottom / vh, 0, 1) : clamp(-wr.top / d, 0, 1);
+          const max = Math.max(0, track.scrollWidth - window.innerWidth);
+          track.style.transform = "translate3d(" + -p * max + "px,0,0)";
+          if (bar) bar.style.width = p * 100 + "%";
         }
-        const r = card.getBoundingClientRect();
-        const nr = next.getBoundingClientRect();
-        const qv = clamp((r.bottom - nr.top) / r.height, 0, 1);
-        card.style.transform = "translate3d(0," + -qv * 30 + "px,0) scale(" + (1 - qv * 0.08) + ")";
-        card.style.filter = "brightness(" + (1 - qv * 0.3) + ")";
-      });
+      }
+      if (caps.length) {
+        const firstTop = caps[0].getBoundingClientRect().top;
+        if (firstTop < vh * 1.2) {
+          caps.forEach((card, i) => {
+            const next = caps[i + 1];
+            if (!next) {
+              card.style.transform = "none";
+              card.style.filter = "none";
+              return;
+            }
+            const r = card.getBoundingClientRect();
+            const nr = next.getBoundingClientRect();
+            const qv = clamp((r.bottom - nr.top) / r.height, 0, 1);
+            card.style.transform = "translate3d(0," + -qv * 30 + "px,0) scale(" + (1 - qv * 0.08) + ")";
+            card.style.filter = "brightness(" + (1 - qv * 0.3) + ")";
+          });
+        }
+      }
       if (procSec && fill) {
         const r = procSec.getBoundingClientRect();
-        const p = clamp((vh * 0.62 - r.top) / (r.height * 0.78), 0, 1);
-        fill.style.height = p * 100 + "%";
-        steps.forEach((s, i) => {
-          const on = p >= (i + 0.15) / steps.length;
-          s.style.opacity = on ? "1" : "0.4";
-          const dot = s.querySelector<HTMLElement>("[data-step-dot]");
-          if (dot) {
-            dot.style.background = on ? "#E84610" : "#E2E1DB";
-            dot.style.transform = on ? "scale(1.35)" : "scale(1)";
-          }
-        });
+        if (r.top < vh * 1.1 && r.bottom > -vh * 0.1) {
+          const p = clamp((vh * 0.62 - r.top) / (r.height * 0.78), 0, 1);
+          fill.style.height = p * 100 + "%";
+          steps.forEach((s, i) => {
+            const on = p >= (i + 0.15) / steps.length;
+            s.style.opacity = on ? "1" : "0.4";
+            const dot = s.querySelector<HTMLElement>("[data-step-dot]");
+            if (dot) {
+              dot.style.background = on ? "#E84610" : "#E2E1DB";
+              dot.style.transform = on ? "scale(1.35)" : "scale(1)";
+            }
+          });
+        }
       }
       if (wordmark) {
         const r = wordmark.getBoundingClientRect();
-        const p = clamp((vh - r.top) / vh, 0, 1);
-        wordmark.style.transform = "translate3d(" + (1 - p) * -8 + "%,0,0)";
+        if (r.top < vh * 1.15 && r.bottom > -vh * 0.15) {
+          const p = clamp((vh - r.top) / vh, 0, 1);
+          wordmark.style.transform = "translate3d(" + (1 - p) * -8 + "%,0,0)";
+        }
       }
     };
 

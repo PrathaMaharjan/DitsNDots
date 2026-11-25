@@ -120,65 +120,69 @@ export function useSectionReveal(
 
       if (positionSheet) {
         const pr = positionSheet.getBoundingClientRect();
-        const tBot = clamp((vh * 0.96 - pr.bottom) / (vh * 0.84), 0, 1);
-        const smoothBot = tBot * tBot * (3 - 2 * tBot);
+        if (pr.top < vh * 1.15 && pr.bottom > -vh * 0.25) {
+          const tBot = clamp((vh * 0.96 - pr.bottom) / (vh * 0.84), 0, 1);
+          const smoothBot = tBot * tBot * (3 - 2 * tBot);
 
-        if (positionText) {
-          const yDrift = (-smoothBot * 52).toFixed(1);
-          const sc = (1 - smoothBot * 0.035).toFixed(4);
-          positionText.style.transform = `translate3d(0,${yDrift}px,0) scale(${sc})`;
-        }
+          if (positionText) {
+            const yDrift = (-smoothBot * 52).toFixed(1);
+            const sc = (1 - smoothBot * 0.035).toFixed(4);
+            positionText.style.transform = `translate3d(0,${yDrift}px,0) scale(${sc})`;
+          }
 
-        // Bottom parallax reveal over Our Works as the curved statement sheet lifts off it
-        if (worksHead) {
-          const pUncover = clamp(1 - pr.bottom / (vh * 0.96), 0, 1);
-          const remain = 1 - pUncover;
-          const yHold = (-remain * 165).toFixed(1);
-          const sc = (1 - remain * 0.045).toFixed(4);
-          worksHead.style.transform = `translate3d(0,${yHold}px,0) scale(${sc})`;
-          worksHead.style.filter = "none";
+          // Bottom parallax reveal over Our Works as the curved statement sheet lifts off it
+          if (worksHead) {
+            const pUncover = clamp(1 - pr.bottom / (vh * 0.96), 0, 1);
+            const remain = 1 - pUncover;
+            const yHold = (-remain * 165).toFixed(1);
+            const sc = (1 - remain * 0.045).toFixed(4);
+            worksHead.style.transform = `translate3d(0,${yHold}px,0) scale(${sc})`;
+            worksHead.style.filter = "none";
+          }
         }
       }
 
       if (lightSheet) {
         const r = lightSheet.getBoundingClientRect();
+        if (r.top < vh * 1.25 && r.bottom > -vh * 0.35) {
+          // 1. Top parallax & uniform dimming over Our Services:
+          //    Pure GPU-composited transform + opacity only (no per-frame margin/border-radius reflows).
+          const pCover = clamp(1 - r.top / vh, 0, 1);
+          const topExit = clamp((r.top + 120) / 120, 0, 1);
+          if (capInner) {
+            const yShift = (pCover * 175).toFixed(1);
+            const sc = (1 - pCover * 0.055).toFixed(4);
+            capInner.style.transform = `translate3d(0,${yShift}px,0) scale(${sc})`;
+            capInner.style.filter = "none";
+          }
+          if (capScrim) {
+            capScrim.style.opacity = (pCover * topExit * 0.5).toFixed(3);
+          }
 
-        // 1. Top parallax & uniform dimming over Our Services:
-        //    Pure GPU-composited transform + opacity only (no per-frame margin/border-radius reflows).
-        const pCover = clamp(1 - r.top / vh, 0, 1);
-        const topExit = clamp((r.top + 120) / 120, 0, 1);
-        if (capInner) {
-          const yShift = (pCover * 175).toFixed(1);
-          const sc = (1 - pCover * 0.055).toFixed(4);
-          capInner.style.transform = `translate3d(0,${yShift}px,0) scale(${sc})`;
-          capInner.style.filter = "none";
-        }
-        if (capScrim) {
-          capScrim.style.opacity = (pCover * topExit * 0.5).toFixed(3);
-        }
+          // 1b. Trusted By parallax drift as the curved sheet rises into view & scrolls down
+          if (trustedInner) {
+            const tr = trustedInner.getBoundingClientRect();
+            const pCenter = clamp((vh - tr.top) / (vh + tr.height), 0, 1);
+            const yParallax = ((0.5 - pCenter) * 76).toFixed(1);
+            trustedInner.style.transform = `translate3d(0,${yParallax}px,0)`;
+          }
 
-        // 1b. Trusted By parallax drift as the curved sheet rises into view & scrolls down
-        if (trustedInner) {
-          const tr = trustedInner.getBoundingClientRect();
-          const pCenter = clamp((vh - tr.top) / (vh + tr.height), 0, 1);
-          const yParallax = ((0.5 - pCenter) * 76).toFixed(1);
-          trustedInner.style.transform = `translate3d(0,${yParallax}px,0)`;
-        }
-
-        // 2. Bottom parallax reveal over Footer: Footer sits shifted up underneath the curved light sheet
-        //    and drifts into place at half-speed as the curved bottom edge lifts off it.
-        if (footerInner) {
-          const pUncover = clamp(1 - (r.bottom - vh * 0.14) / (vh * 0.84), 0, 1);
-          const remain = 1 - pUncover;
-          const yHold = (-remain * 175).toFixed(1);
-          const sc = (1 - remain * 0.045).toFixed(4);
-          footerInner.style.transform = `translate3d(0,${yHold}px,0) scale(${sc})`;
-          footerInner.style.filter = "none";
+          // 2. Bottom parallax reveal over Footer: Footer sits shifted up underneath the curved light sheet
+          //    and drifts into place at half-speed as the curved bottom edge lifts off it.
+          if (footerInner) {
+            const pUncover = clamp(1 - (r.bottom - vh * 0.14) / (vh * 0.84), 0, 1);
+            const remain = 1 - pUncover;
+            const yHold = (-remain * 175).toFixed(1);
+            const sc = (1 - remain * 0.045).toFixed(4);
+            footerInner.style.transform = `translate3d(0,${yHold}px,0) scale(${sc})`;
+            footerInner.style.filter = "none";
+          }
         }
       }
 
       depthSections.forEach((section) => {
         const r = section.getBoundingClientRect();
+        if (r.top > vh * 1.15 || r.bottom < -vh * 0.15) return;
         const pOut = clamp((vh - r.bottom) / vh, 0, 1);
         const inner = section.querySelector<HTMLElement>("[data-depth-inner]");
         if (inner && !inner.dataset.trustedInner) {
