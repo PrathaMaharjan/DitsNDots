@@ -161,19 +161,19 @@ export default function InitialLoader() {
           /* Reveal only the wordmark half (grid ends at 36.04%, 'D' starts at 36.72%) */
           clip-path: inset(0 0 0 36.2%);
           opacity: 0;
-          transform: translate3d(48px, 0, 0);
-          transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+          transform: translate3d(20px, 28px, 0);
+          transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
                       transform 0.68s cubic-bezier(0.22, 1, 0.36, 1);
           will-change: opacity, transform;
         }
         .ab-loader-logo-img[data-revealed="1"] {
           opacity: 1;
-          transform: translate3d(8px, 0, 0);
+          transform: translate3d(20px, 0, 0);
         }
-        /* Exact measured 4x4 grid bounds inside 1920x1080 white logo.png (X: 8.33%-36.04%, Y: 25%-74.26%) */
+        /* Exact measured 4x4 grid bounds inside 1920x1080 white logo.png, shifted slightly left for a wider gap */
         .ab-loader-grid-overlay {
           position: absolute;
-          left: 8.33%;
+          left: 5.5%;
           top: 25%;
           width: 27.71%;
           height: 49.26%;
