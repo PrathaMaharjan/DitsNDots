@@ -948,7 +948,7 @@ app.get('/api/content', async (req, res) => {
         if (val.startsWith("[")) {
           return JSON.parse(val);
         }
-      } catch (e) {}
+      } catch (e) { }
       return [heroRows[0]?.headlineLine2, heroRows[0]?.headlineLine3].filter(Boolean);
     })();
 
@@ -1412,8 +1412,8 @@ app.post('/api/content/:id', async (req, res) => {
       const projectsList = Array.isArray(contentBody)
         ? contentBody
         : Array.isArray(contentBody.projects)
-        ? contentBody.projects
-        : [];
+          ? contentBody.projects
+          : [];
       for (let i = 0; i < projectsList.length; i++) {
         const p = projectsList[i];
         const sectionsStr = typeof p.bodySections === "string"
@@ -1521,8 +1521,8 @@ app.post('/api/content/:id', async (req, res) => {
       const logosList = Array.isArray(contentBody)
         ? contentBody
         : Array.isArray(contentBody.logos)
-        ? contentBody.logos
-        : [];
+          ? contentBody.logos
+          : [];
       for (let i = 0; i < logosList.length; i++) {
         const logo = logosList[i];
         await db.insert(logos).values({
@@ -1537,8 +1537,8 @@ app.post('/api/content/:id', async (req, res) => {
       const statsList = Array.isArray(contentBody)
         ? contentBody
         : Array.isArray(contentBody.stats)
-        ? contentBody.stats
-        : [];
+          ? contentBody.stats
+          : [];
       for (let i = 0; i < statsList.length; i++) {
         const s = statsList[i];
         await db.insert(companyStats).values({
@@ -1555,8 +1555,8 @@ app.post('/api/content/:id', async (req, res) => {
       const testList = Array.isArray(contentBody)
         ? contentBody
         : Array.isArray(contentBody.testimonials)
-        ? contentBody.testimonials
-        : [];
+          ? contentBody.testimonials
+          : [];
       for (let i = 0; i < testList.length; i++) {
         const t = testList[i];
         await db.insert(testimonials).values({
