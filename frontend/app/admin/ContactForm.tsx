@@ -87,7 +87,7 @@ export default function ContactForm({
           <input
             type="email"
             disabled={disabled}
-            placeholder="e.g. hello@ditsanddots.com"
+            placeholder="e.g. hello@Ditsanddots.com"
             value={data?.email || ""}
             onChange={(e) => {
               if (onStartEditing) onStartEditing();

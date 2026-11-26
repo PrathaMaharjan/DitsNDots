@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { displayFont } from "./tokens";
 import { getLenis } from "../../lib/v2/useLenis";
 import { triggerSlideOver } from "./SlideOverTransition";
+import BrandLogo from "./BrandLogo";
 
 const CENTER_LINKS = [
   { label: "Home", href: "#top" },
@@ -144,27 +145,6 @@ export default function NavV2() {
           position: relative;
           display: inline-flex;
           align-items: center;
-          height: clamp(62px, 6.2vw, 84px);
-          margin: -8px 0;
-        }
-        .ab-nav-logo-img {
-          height: 100%;
-          width: auto;
-          object-fit: contain;
-          display: block;
-          transition: opacity 0.28s ease;
-        }
-        .ab-nav-logo-dark {
-          position: absolute;
-          left: 0;
-          top: 0;
-          opacity: 0;
-        }
-        [data-nav="1"][data-tone="dark"] .ab-nav-logo-light {
-          opacity: 0;
-        }
-        [data-nav="1"][data-tone="dark"] .ab-nav-logo-dark {
-          opacity: 1;
         }
         .ab-nav-center {
           display: inline-flex;
@@ -373,19 +353,7 @@ export default function NavV2() {
               className="ab-nav-logo-stack"
               style={{ textDecoration: "none" }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo/white%20logo.png"
-                alt="Dits N Dots"
-                className="ab-nav-logo-img ab-nav-logo-light"
-              />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo/dark%20logo.png"
-                alt=""
-                aria-hidden="true"
-                className="ab-nav-logo-img ab-nav-logo-dark"
-              />
+              <BrandLogo variant="auto" size="nav" />
             </a>
           </div>
 

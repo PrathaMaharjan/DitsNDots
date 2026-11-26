@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Button from "../../components/ui/Button";
 import { AdminSkeleton } from "../../components/ui/Skeleton";
+import BrandLogo from "../../components/v2/BrandLogo";
 
 // Import modular forms
 import PositionForm from "./PositionForm";
@@ -266,8 +267,8 @@ export default function AdminPage() {
         <header className="w-full border-b border-neutral-200/50 py-5 px-6 md:px-12 bg-white sticky top-0 z-40 shadow-sm">
           <div className="max-w-[1400px] mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="text-lg font-black tracking-tight text-foreground">DITSNDOTS</span>
-              <span className="text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase">
+              <BrandLogo variant="light" size="nav" />
+              <span className="hidden sm:inline-block text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase">
                 CONTROL PANEL
               </span>
             </div>
@@ -363,13 +364,8 @@ export default function AdminPage() {
       <header className="w-full border-b border-neutral-200/50 py-4 sm:py-5 px-4 sm:px-6 md:px-12 bg-white sticky top-0 z-40 shadow-sm">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <a href="/" className="inline-flex items-center shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo/white%20logo.png"
-                alt="Dits N Dots"
-                className="h-14 sm:h-16 w-auto object-contain -my-2"
-              />
+            <a href="/" aria-label="Dits N Dots Home" className="inline-flex items-center shrink-0">
+              <BrandLogo variant="light" size="nav" />
             </a>
             <span className="hidden sm:inline-block text-[10px] font-mono bg-neutral-100 text-neutral-500 font-bold px-2 py-0.5 rounded uppercase shrink-0">
               CONTROL PANEL

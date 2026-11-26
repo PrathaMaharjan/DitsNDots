@@ -55,19 +55,15 @@ const DELETE_MS = 60;
 // };
 
 // Local hero art from /public/images/hero.
-// Desktop uses 3 plates (`three` backmost, `two` studio lights, `one` foreground desk).
+// Desktop uses 2 plates (`three` backmost, `one` foreground desk).
 // Mobile (<= 768px) uses the dedicated portrait plates (`mobileview_layer2.png`
-// backmost room + floor, `mobileview_layer1.png` foreground desk) and skips the middle layer.
+// backmost room + floor, `mobileview_layer1.png` foreground desk).
 const LAYER_IMAGES = {
   three: "/images/hero/layer3.1.jpg",
-  two: "/images/hero/55.3.png",
   one: "/images/hero/layer1.1.png",
   mobileTwo: "/images/hero/mobileview_layer2.png",
   mobileOne: "/images/hero/mobileview_layer1.png",
 };
-
-const EMPTY_PIXEL =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
 // Straight from the source: layer 1 sits furthest back and is driven down
 // hardest, cancelling most of the page's upward travel so it reads as near
@@ -75,7 +71,6 @@ const EMPTY_PIXEL =
 // across the title on layer 3.
 const DESKTOP_LAYERS = [
   { layer: "1", yPercent: 70 },
-  { layer: "2", yPercent: 55 },
   { layer: "3", yPercent: 40 },
   { layer: "4", yPercent: 10 },
 ];
@@ -170,7 +165,7 @@ export default function HeroV2({ statement }: HeroV2Props) {
 
   // Next.js Image Optimization props (default quality 75 for Next 16 compatibility):
   // Mobile (<= 768px) downloads only mobileview_layer2 & mobileview_layer1 at phone widths;
-  // Desktop (> 768px) downloads only layer3.1, layer2.3 & layer1.1.
+  // Desktop (> 768px) downloads only layer3.1 & layer1.1.
   const desktopBack = getImageProps({
     alt: "",
     width: 1376,
@@ -187,15 +182,6 @@ export default function HeroV2({ statement }: HeroV2Props) {
     quality: 75,
     sizes: "100vw",
     src: LAYER_IMAGES.mobileTwo,
-  }).props;
-
-  const desktopMid = getImageProps({
-    alt: "",
-    width: 1376,
-    height: 768,
-    quality: 75,
-    sizes: "100vw",
-    src: LAYER_IMAGES.two,
   }).props;
 
   const desktopFront = getImageProps({
@@ -299,25 +285,6 @@ export default function HeroV2({ statement }: HeroV2Props) {
                   data-parallax-layer="1"
                   alt=""
                   className="parallax__layer-img"
-                />
-              </picture>
-            )}
-
-            {/* Layer 2 (Middle studio lights): desktop only; skipped on mobile */}
-            {!isMobile && (
-              <picture className="parallax__layer-picture parallax__layer-picture--desktop-only">
-                <source media="(max-width: 768px)" srcSet={EMPTY_PIXEL} />
-                <source media="(min-width: 769px)" srcSet={desktopMid.srcSet} sizes="100vw" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={EMPTY_PIXEL}
-                  loading="eager"
-                  decoding="async"
-                  width={1376}
-                  height={768}
-                  data-parallax-layer="2"
-                  alt=""
-                  className="parallax__layer-img parallax__layer-img--desktop-only"
                 />
               </picture>
             )}

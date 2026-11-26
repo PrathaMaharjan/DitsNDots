@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { displayFont } from "./tokens";
 import GreenWavePattern from "./GreenWavePattern";
+import BrandLogo from "./BrandLogo";
 
 interface PieceSpec {
   id: string;
@@ -539,7 +540,7 @@ export default function FooterV2() {
       dragRef.current = { body: b, px: p.x - b.x, py: p.y - b.y, lx: p.x, ly: p.y };
       try {
         el.setPointerCapture(e.pointerId);
-      } catch {}
+      } catch { }
       e.preventDefault();
       start();
     };
@@ -751,7 +752,7 @@ export default function FooterV2() {
                   WebkitUserSelect: "none",
                 }}
               >
-                hello@ditsanddots.com
+                hello@Ditsanddots.com
               </span>
             </div>
 
@@ -851,12 +852,7 @@ export default function FooterV2() {
                 alignItems: "center",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/logo/dark%20logo.png"
-                alt="Dits N Dots"
-                style={{ height: 64, width: "auto", objectFit: "contain", display: "block", margin: "-12px 0" }}
-              />
+              <BrandLogo variant="dark" size="footer" />
             </span>
             <span>&copy; 2026 Dits and Dots Agency</span>
           </div>

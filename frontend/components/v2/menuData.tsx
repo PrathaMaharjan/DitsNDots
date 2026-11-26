@@ -21,7 +21,7 @@ export const STUDIOS = ["3620 Adelaide, The Colony, TX 75056"];
 export type ContactLink = { label: string; href: string; strong?: boolean };
 
 export const CONTACTS: ContactLink[] = [
-  { label: "hello@ditsanddots.com", href: "mailto:hello@ditsanddots.com", strong: true },
+  { label: "hello@Ditsanddots.com", href: "mailto:hello@Ditsanddots.com", strong: true },
   { label: "+1 (817) 330-9194", href: "tel:+18173309194" },
 ];
 

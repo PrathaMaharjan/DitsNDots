@@ -148,8 +148,8 @@ export default function InitialLoader() {
         }
         .ab-loader-stage {
           position: relative;
-          width: clamp(260px, 34vw, 440px);
-          aspect-ratio: 16 / 9;
+          width: clamp(250px, 32vw, 420px);
+          aspect-ratio: 1 / 1;
         }
         .ab-loader-logo-img {
           position: absolute;
@@ -158,29 +158,29 @@ export default function InitialLoader() {
           height: 100%;
           object-fit: contain;
           display: block;
-          /* Reveal only the wordmark half (grid ends at 36.04%, 'D' starts at 36.72%) */
-          clip-path: inset(0 0 0 36.2%);
+          /* Reveal only the wordmark half (grid ends at 30.4%, 'D' starts at 33.1%) */
+          clip-path: inset(0 0 0 31.7%);
           opacity: 0;
-          transform: translate3d(20px, 28px, 0);
+          transform: translate3d(16px, 28px, 0);
           transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
                       transform 0.68s cubic-bezier(0.22, 1, 0.36, 1);
           will-change: opacity, transform;
         }
         .ab-loader-logo-img[data-revealed="1"] {
           opacity: 1;
-          transform: translate3d(20px, 0, 0);
+          transform: translate3d(16px, 0, 0);
         }
-        /* Exact measured 4x4 grid bounds inside 1920x1080 white logo.png, shifted slightly left for a wider gap */
+        /* Exact measured 4x4 grid bounds inside 2000x2000 white logo.png */
         .ab-loader-grid-overlay {
           position: absolute;
-          left: 5.5%;
-          top: 25%;
-          width: 27.71%;
-          height: 49.26%;
+          left: 1.3%;
+          top: 35.6%;
+          width: 29.1%;
+          height: 29.1%;
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           grid-template-rows: repeat(4, 1fr);
-          gap: 9.2%;
+          gap: 7.5%;
           pointer-events: none;
         }
         .ab-loader-particle {

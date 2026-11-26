@@ -217,7 +217,7 @@ export const faqContent = {
     {
       question: "How do we start a project?",
       answer:
-        "Reach out via the contact form, email hello@ditsanddots.com, or call +1 (817) 330-9194 to discuss your goals and scope.",
+        "Reach out via the contact form, email hello@Ditsanddots.com, or call +1 (817) 330-9194 to discuss your goals and scope.",
     },
   ],
 };
@@ -227,7 +227,7 @@ export const contactContent = {
   headlineLine2: "Extraordinary.",
   description:
     "Ready to elevate your digital presence? Reach out to us today and let's discuss how we can help your business grow.",
-  email: "hello@ditsanddots.com",
+  email: "hello@Ditsanddots.com",
   phone: "+1 (817) 330-9194",
   skills: [
     { label: "Web Development", accent: true },

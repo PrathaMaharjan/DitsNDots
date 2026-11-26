@@ -37,7 +37,7 @@ export default function ContactV2({ data }: ContactV2Props) {
   const description =
     data?.description ||
     "Ready to elevate your digital presence? Reach out to us today and let's discuss how we can help your business grow.";
-  const email = data?.email || "hello@ditsanddots.com";
+  const email = data?.email || "hello@Ditsanddots.com";
   const phone = data?.phone || "+1 (817) 330-9194";
 
   const [sheetOpen, setSheetOpen] = useState(false);
